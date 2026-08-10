@@ -24,7 +24,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label for="edit_price" class="form-label">Harga Weekday (Senin-Kamis)</label>
+                    <label for="edit_price" class="form-label">Harga Weekday</label>
                     <input type="number" id="edit_price" name="price" class="form-input" min="0" required>
                 </div>
                 <div class="form-group">

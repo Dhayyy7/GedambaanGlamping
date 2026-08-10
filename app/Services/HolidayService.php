@@ -148,9 +148,9 @@ class HolidayService
     {
         $carbon = $date instanceof Carbon ? $date : Carbon::parse($date);
         
-        // Day of week: 0 = Sunday, 5 = Friday, 6 = Saturday
+        // Day of week: 5 = Friday, 6 = Saturday (Jumat & Sabtu)
         $dayOfWeek = $carbon->dayOfWeek;
-        if (in_array($dayOfWeek, [0, 5, 6])) {
+        if (in_array($dayOfWeek, [5, 6])) {
             return true;
         }
 

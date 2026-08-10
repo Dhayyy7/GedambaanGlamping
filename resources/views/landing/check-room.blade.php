@@ -511,8 +511,8 @@
                                     $maintNote = $isMaintenance ? $maintenanceMap[$dStr] : null;
 
                                     $dtCarbon = \Carbon\Carbon::createFromDate((int)$calYear, (int)$calMonth, $d);
-                                    $dayOfWeek = $dtCarbon->dayOfWeek; // 0 = Sun, 5 = Fri, 6 = Sat
-                                    $isWeekendOrHoliday = in_array($dayOfWeek, [0, 5, 6]) || in_array($dStr, $holidayDates ?? []);
+                                    $dayOfWeek = $dtCarbon->dayOfWeek; // 5 = Fri, 6 = Sat
+                                    $isWeekendOrHoliday = in_array($dayOfWeek, [5, 6]) || in_array($dStr, $holidayDates ?? []);
                                 @endphp
 
                                 @if($isBooked)

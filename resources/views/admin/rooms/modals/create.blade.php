@@ -23,12 +23,12 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label for="price" class="form-label">Harga Weekday (Senin-Kamis)</label>
+                    <label for="price" class="form-label">Harga Weekday</label>
                     <input type="number" id="price" name="price" class="form-input" placeholder="Harga per malam" min="0" required>
                 </div>
                 <div class="form-group">
                     <label for="weekend_price" class="form-label">Harga Weekend & Libur</label>
-                    <input type="number" id="weekend_price" name="weekend_price" class="form-input" placeholder="Opsional (Jum, Sab, Ming)" min="0">
+                    <input type="number" id="weekend_price" name="weekend_price" class="form-input" placeholder="Opsional (Jum, Sab)" min="0">
                 </div>
             </div>
 

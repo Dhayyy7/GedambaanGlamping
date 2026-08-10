@@ -857,8 +857,8 @@
                             $dateStr = $dtCarbon->format('Y-m-d');
                             $isBooked = in_array($dateStr, $bookedDates);
                             $isMaintenance = in_array($dateStr, $maintenanceDates ?? []);
-                            $dayOfWeek = $dtCarbon->dayOfWeek; // 0 = Sun, 5 = Fri, 6 = Sat
-                            $isWeekendOrHoliday = in_array($dayOfWeek, [0, 5, 6]) || in_array($dateStr, $holidayDates ?? []);
+                            $dayOfWeek = $dtCarbon->dayOfWeek; // 5 = Fri, 6 = Sat
+                            $isWeekendOrHoliday = in_array($dayOfWeek, [5, 6]) || in_array($dateStr, $holidayDates ?? []);
 
                             $cellClass = 'available';
                             if ($isBooked) {
@@ -1190,7 +1190,7 @@
                 let dd = String(curr.getDate()).padStart(2, '0');
                 let dateStr = `${yyyy}-${mm}-${dd}`;
 
-                let isWeekendOrHoliday = (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) || (Array.isArray(holidayDatesList) && holidayDatesList.includes(dateStr));
+                let isWeekendOrHoliday = (dayOfWeek === 5 || dayOfWeek === 6) || (Array.isArray(holidayDatesList) && holidayDatesList.includes(dateStr));
                 let baseRate = (isWeekendOrHoliday && roomWeekendPrice > 0) ? roomWeekendPrice : roomWeekdayPrice;
                 let finalRate = roomDiscount > 0 ? baseRate - (baseRate * (roomDiscount / 100)) : baseRate;
 
