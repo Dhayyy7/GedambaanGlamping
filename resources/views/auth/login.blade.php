@@ -7,7 +7,7 @@
         $appSetting = \App\Models\Setting::getSetting();
     @endphp
 
-    <title>Login Admin - {{ $appSetting->homestay_name ?? 'Faradisa HomeStay' }}</title>
+    <title>Login Admin - {{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }}</title>
 
     <!-- Favicon Icon Tab Web -->
     @if($appSetting->logo && file_exists(public_path($appSetting->logo)))
@@ -280,7 +280,7 @@
             <div class="brand-logo">
                 <i class="fa-solid fa-house-chimney"></i>
             </div>
-            <h1 class="brand-title">Faradisa HomeStay</h1>
+            <h1 class="brand-title">{{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }}</h1>
             <p class="brand-subtitle">Panel Kontrol Admin & Manajemen</p>
         </div>
 
@@ -333,7 +333,7 @@
         </form>
 
         <div class="footer-note">
-            &copy; {{ date('Y') }} Faradisa HomeStay. All rights reserved.
+            &copy; {{ date('Y') }} {{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }}. All rights reserved.
         </div>
     </div>
 

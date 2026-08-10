@@ -262,9 +262,9 @@ function submitBookingToWA() {
         return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     };
 
-    let waText = `Halo Admin Faradisa HomeStay,\n\nSaya ingin melakukan *Pemesanan Kamar* dengan detail sebagai berikut:\n\n` +
+    let waText = `Halo Admin Gedambaan Glamping,\n\nSaya ingin melakukan *Pemesanan Glamping* dengan detail sebagai berikut:\n\n` +
                  `👤 *Nama Pemesan*: ${customerName}\n` +
-                 `🏨 *Kamar / Unit*: ${activeBookingState.roomName} (${activeBookingState.roomCode})\n` +
+                 `⛺ *Unit Glamping*: ${activeBookingState.roomName} (${activeBookingState.roomCode})\n` +
                  `📅 *Check-In*: ${formatIndoDate(checkInDate)}\n` +
                  `📅 *Check-Out*: ${formatIndoDate(checkOutDate)} (${totalNights} Malam)\n`;
 
@@ -293,7 +293,7 @@ function submitBookingToWA() {
 function openGalleryModal(src, type, title) {
     const modal = document.getElementById('galleryModal');
     const container = document.getElementById('gallery_modal_content');
-    document.getElementById('gallery_modal_title').innerText = title || 'Aset Foto Faradisa HomeStay';
+    document.getElementById('gallery_modal_title').innerText = title || 'Aset Foto Gedambaan Glamping';
 
     if (type === 'video') {
         container.innerHTML = `<video src="${src}" controls autoplay class="w-full max-h-[75vh] rounded-xl object-contain bg-black"></video>`;

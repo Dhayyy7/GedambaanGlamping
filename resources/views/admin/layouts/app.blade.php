@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Admin Dashboard') - {{ $appSetting->homestay_name ?? 'Faradisa HomeStay' }}</title>
+    <title>@yield('title', 'Admin Dashboard') - {{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }}</title>
 
     <!-- Favicon Icon Tab Web -->
     @if(!empty($appSetting->logo) && file_exists(public_path(ltrim($appSetting->logo, '/'))))
@@ -531,7 +531,7 @@
                     <i class="fa-solid fa-house-chimney"></i>
                 </div>
             @endif
-            <div class="sidebar-brand-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $appSetting->homestay_name ?? 'Faradisa Admin' }}</div>
+            <div class="sidebar-brand-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }}</div>
         </div>
 
         <ul class="sidebar-menu">
@@ -688,7 +688,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            &copy; {{ date('Y') }} {{ $appSetting->homestay_name ?? 'Faradisa HomeStay' }} - Panel Kontrol Admin.
+            &copy; {{ date('Y') }} {{ $appSetting->homestay_name ?? 'Gedambaan Glamping' }} - Panel Kontrol Admin.
         </footer>
     </div>
 

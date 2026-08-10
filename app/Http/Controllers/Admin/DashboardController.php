@@ -81,9 +81,9 @@ class DashboardController extends Controller
         $year = (int) $request->input('year', date('Y'));
 
         $setting = \App\Models\Setting::first() ?? new \App\Models\Setting([
-            'homestay_name' => 'Faradisa HomeStay',
-            'address' => 'Banjarbaru, Kalimantan Selatan',
-            'wa_number' => '6281234567890',
+            'homestay_name' => 'Gedambaan Glamping',
+            'address' => 'Pantai Gedambaan, Kotabaru, Kalimantan Selatan',
+            'wa_number' => '08776905151',
         ]);
 
         $bookings = Booking::with('room')
@@ -115,8 +115,8 @@ class DashboardController extends Controller
         $year = (int) $request->input('year', date('Y'));
 
         $setting = \App\Models\Setting::first() ?? new \App\Models\Setting([
-            'homestay_name' => 'Faradisa HomeStay',
-            'address' => 'Banjarbaru, Kalimantan Selatan',
+            'homestay_name' => 'Gedambaan Glamping',
+            'address' => 'Pantai Gedambaan, Kotabaru, Kalimantan Selatan',
         ]);
 
         $monthName = Carbon::createFromDate($year, $month, 1)->translatedFormat('F');

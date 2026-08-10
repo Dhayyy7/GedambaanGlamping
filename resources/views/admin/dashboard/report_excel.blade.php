@@ -37,7 +37,7 @@
     <table>
         <!-- Header Homestay -->
         <tr>
-            <td colspan="13" class="title-header" style="height: 30px;">{{ strtoupper($setting->homestay_name ?? 'FARADISA HOMESTAY') }}</td>
+            <td colspan="13" class="title-header" style="height: 30px;">{{ strtoupper($setting->homestay_name ?? 'GEDAMBAAN GLAMPING') }}</td>
         </tr>
         <tr>
             <td colspan="13" class="subtitle-header">LAPORAN BULANAN PEMESANAN HOMESTAY</td>

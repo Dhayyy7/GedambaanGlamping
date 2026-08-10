@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nota Pembayaran #{{ $booking->booking_code }} - {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</title>
+    <title>Nota Pembayaran #{{ $booking->booking_code }} - {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
@@ -205,7 +205,7 @@
         <table class="header-table">
             <tr>
                 <td>
-                    <div class="homestay-title">{{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</div>
+                    <div class="homestay-title">{{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</div>
                     <div class="homestay-meta">
                         {{ $setting->address ?? 'Banjarbaru, Kalimantan Selatan' }}<br>
                         No. WA / Kontak: +{{ preg_replace('/[^0-9]/', '', $setting->wa_number ?? '6281234567890') }}
@@ -340,13 +340,13 @@
         <!-- Signature -->
         <div class="signature-section">
             <div class="note-text">
-                * Terima kasih telah menginap di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}. Nota ini merupakan bukti pembayaran yang sah.
+                * Terima kasih telah menginap di {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}. Nota ini merupakan bukti pembayaran yang sah.
             </div>
             <div class="sign-box">
-                Banjarbaru, {{ date('d F Y') }}<br>
-                <strong>Pengelola / Admin Homestay</strong>
+                Kotabaru, {{ date('d F Y') }}<br>
+                <strong>Pengelola / Admin Glamping</strong>
                 <br><br><br><br>
-                ( {{ auth()->user()->name ?? 'Admin Faradisa' }} )
+                ( {{ auth()->user()->name ?? 'Admin Gedambaan Glamping' }} )
             </div>
         </div>
     </div>

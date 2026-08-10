@@ -16,8 +16,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cek Ketersediaan Kamar - {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</title>
-    <meta name="description" content="Kalender ketersediaan kamar real-time di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}. Cek tanggal bebas dan pesan kamar favorit Anda.">
+    <title>Cek Ketersediaan Unit Glamping - {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</title>
+    <meta name="description" content="Kalender ketersediaan unit glamping real-time di {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}. Cek tanggal bebas dan pesan unit favorit Anda.">
     
     <!-- Dynamic Favicon -->
     @if(!empty($setting->logo) && file_exists(public_path(ltrim($setting->logo, '/'))))
@@ -340,12 +340,12 @@
                 @if(!empty($setting->logo) && file_exists(public_path(ltrim($setting->logo, '/'))))
                     <img src="/{{ ltrim($setting->logo, '/') }}" alt="Logo {{ $setting->homestay_name }}" class="brand-logo-img">
                 @endif
-                <span>{{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</span>
+                <span>{{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</span>
             </a>
         </div>
 
         <div>
-            <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Faradisa HomeStay') }},%20saya%20ingin%20bertanya%20informasi%20ketersediaan." target="_blank" class="btn-contact-header">
+            <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Gedambaan Glamping') }},%20saya%20ingin%20bertanya%20informasi%20ketersediaan." target="_blank" class="btn-contact-header">
                 <i class="fa-solid fa-phone"></i>
                 <span>Hubungi Kami</span>
             </a>
@@ -551,7 +551,7 @@
     <footer class="landing-footer">
         <div style="max-width: 1240px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
-                &copy; {{ date('Y') }} <strong>{{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</strong>. All Rights Reserved.
+                &copy; {{ date('Y') }} <strong>{{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</strong>. All Rights Reserved.
             </div>
             <div>
                 <a href="https://wa.me/{{ $waClean }}" target="_blank" style="color: var(--nusakos-brown); text-decoration: none; font-weight: 700;">

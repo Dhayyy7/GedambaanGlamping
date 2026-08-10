@@ -163,7 +163,7 @@
                 @endif
             </td>
             <td>
-                <div class="homestay-title">{{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</div>
+                <div class="homestay-title">{{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</div>
                 <div class="homestay-meta">
                     {{ $setting->address ?? 'Banjarbaru, Kalimantan Selatan' }} • No. WA: +{{ preg_replace('/[^0-9]/', '', $setting->wa_number ?? '6281234567890') }}
                 </div>
@@ -270,7 +270,7 @@
                 Banjarbaru, {{ date('d F Y') }}<br>
                 <strong>Pengelola / Admin Homestay</strong>
                 <br><br><br><br><br>
-                ( {{ auth()->user()->name ?? 'Admin Faradisa' }} )
+                ( {{ auth()->user()->name ?? 'Admin Gedambaan Glamping' }} )
             </td>
         </tr>
     </table>

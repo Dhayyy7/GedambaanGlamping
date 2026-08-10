@@ -11,8 +11,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $setting->homestay_name ?? 'Faradisa HomeStay' }} - Pilihan Utama Kenyamanan Menginap</title>
-    <meta name="description" content="Nikmati pengalaman menginap terbaik di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }} dengan fasilitas lengkap, bersih, dan pelayanan ramah.">
+    <title>{{ $setting->homestay_name ?? 'Gedambaan Glamping' }} - Escape to Nature, Wake Up to SunRise Moment</title>
+    <meta name="description" content="Glamping Premium di tepi Pantai Gedambaan Kotabaru. Nikmati pengalaman camping mewah dengan fasilitas lengkap dan matahari terbit.">
     
     <!-- Dynamic Favicon -->
     @if(!empty($setting->logo) && file_exists(public_path(ltrim($setting->logo, '/'))))
@@ -51,15 +51,15 @@
                     </div>
                 @endif
                 <span class="nav-brand-title">
-                    {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}
+                    {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}
                 </span>
             </a>
 
             <!-- Navigation Links (Desktop) -->
             <nav class="nav-links">
                 <a href="#kamars" class="nav-item-link">
-                    <i class="fa-solid fa-bed" style="color: #f97316;"></i>
-                    <span>Pesan Kamar</span>
+                    <i class="fa-solid fa-tent" style="color: #f97316;"></i>
+                    <span>Pesan Glamping</span>
                 </a>
                 <a href="#fasilitas" class="nav-item-link">
                     <i class="fa-solid fa-wand-magic-sparkles" style="color: #f97316;"></i>
@@ -89,7 +89,7 @@
                     <span>0{{ substr($waClean, 2) }}</span>
                 </a>
 
-                <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Faradisa HomeStay') }},%20saya%20ingin%20bertanya%20mengenai%20reservasi." target="_blank" class="btn-header-wa">
+                <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Gedambaan Glamping') }},%20saya%20ingin%20bertanya%20mengenai%20reservasi." target="_blank" class="btn-header-wa">
                     <i class="fa-brands fa-whatsapp"></i>
                     <span>Hubungi Kami</span>
                 </a>
@@ -120,24 +120,24 @@
         <div class="hero-inner">
             <!-- Badge Subtitle -->
             <div class="hero-badge">
-                <span>EST. 2026 — HOMESTAY PREMIUM</span>
+                <span>EST. 2026 — GLAMPING PREMIUM</span>
             </div>
 
             <!-- Main Title (NusaKos Style Italic Serif) -->
             <h1 class="hero-title">
-                Pilihan Utama Untuk
-                <span class="hero-title-serif">Kenyamanan Menginap</span>
+                "Escape to Nature,
+                <span class="hero-title-serif">Wake Up to SunRise Moment"</span>
             </h1>
 
             <!-- Subtitle Description -->
             <p class="hero-desc">
-                Nikmati pengalaman menginap terbaik di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }} dengan fasilitas lengkap dan pelayanan ramah
+                Glamping Premium di tepi Pantai Gedambaan Kotabaru. Nikmati momen alam memukau dengan fasilitas lengkap dan udara pantai yang segar.
             </p>
 
             <!-- CTA Buttons -->
             <div class="hero-cta-group">
                 <a href="#kamars" class="btn-hero-primary">
-                    <span>PESAN KAMAR</span>
+                    <span>PESAN GLAMPING</span>
                 </a>
                 <a href="{{ route('check-room') }}" class="btn-hero-secondary">
                     <span>CEK KETERSEDIAAN</span>
@@ -151,21 +151,21 @@
                 <div class="hero-card-main">
                     <div class="info-left">
                         <div class="info-icon-box">
-                            <i class="fa-solid fa-bed"></i>
+                            <i class="fa-solid fa-tent"></i>
                         </div>
                         <div style="text-align: left;">
                             <div class="info-status-badge">
                                 <span class="pulse-dot"></span>
-                                <span>Kamar Tersedia</span>
+                                <span>Unit Glamping Tersedia</span>
                             </div>
-                            <div class="info-title">{{ $rooms->count() }} Kamar</div>
+                            <div class="info-title">{{ $rooms->count() }} Unit Glamping</div>
                         </div>
                     </div>
 
                     <div class="info-right-buttons">
                         <a href="#kamars" class="btn-card-primary">
-                            <i class="fa-solid fa-bed"></i>
-                            <span>Pesan Kamar</span>
+                            <i class="fa-solid fa-tent"></i>
+                            <span>Pesan Unit Glamping</span>
                             <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
                         </a>
                         <a href="{{ route('check-room') }}" class="btn-card-secondary">
@@ -199,69 +199,69 @@
         </div>
 
         <div class="features-grid">
-            <!-- Feature 1: AC -->
+            <!-- Feature 1: Naturehike Premium Tent -->
             <div class="feature-card animate-on-scroll delay-1">
                 <div class="feature-icon-box">
-                    <i class="fa-solid fa-snowflake"></i>
+                    <i class="fa-solid fa-tent"></i>
                 </div>
-                <h3 class="feature-card-title">AC Dingin & Kipas</h3>
+                <h3 class="feature-card-title">Naturehike Premium Tent</h3>
                 <p class="feature-card-desc">
-                    Setiap kamar dilengkapi pendingin ruangan (AC) dingin berkualitas untuk menjamin istirahat malam Anda nyenyak.
+                    Tenda glamping mewah kualitas terbaik dari Naturehike yang kokoh, luas, dan nyaman di tepi pantai.
                 </p>
             </div>
 
-            <!-- Feature 2: High Speed WiFi -->
+            <!-- Feature 2: Air Bed & Sofabed -->
+            <div class="feature-card animate-on-scroll delay-2">
+                <div class="feature-icon-box">
+                    <i class="fa-solid fa-mattress-pillow"></i>
+                </div>
+                <h3 class="feature-card-title">Air Bed & Sofabed</h3>
+                <p class="feature-card-desc">
+                    Dilengkapi kasur angin empuk (Air Bed) serta Sofabed santai untuk menjamin kualitas tidur maksimal.
+                </p>
+            </div>
+
+            <!-- Feature 3: Air Cooler / Kipas Angin -->
+            <div class="feature-card animate-on-scroll delay-3">
+                <div class="feature-icon-box">
+                    <i class="fa-solid fa-fan"></i>
+                </div>
+                <h3 class="feature-card-title">Air Cooler / Kipas Angin</h3>
+                <p class="feature-card-desc">
+                    Penyejuk udara siap menjaga suhu di dalam tenda tetap sejuk dan nyaman kapan pun Anda beristirahat.
+                </p>
+            </div>
+
+            <!-- Feature 4: Area Bilas dan Toilet Dekat -->
+            <div class="feature-card animate-on-scroll delay-1">
+                <div class="feature-icon-box">
+                    <i class="fa-solid fa-toilet"></i>
+                </div>
+                <h3 class="feature-card-title">Area Bilas & Toilet Dekat</h3>
+                <p class="feature-card-desc">
+                    Akses sangat mudah dan dekat ke area bilas serta fasilitas toilet umum yang senantiasa terjaga kebersihannya.
+                </p>
+            </div>
+
+            <!-- Feature 5: Free Wifi & Welcome Drink -->
             <div class="feature-card animate-on-scroll delay-2">
                 <div class="feature-icon-box">
                     <i class="fa-solid fa-wifi"></i>
                 </div>
-                <h3 class="feature-card-title">Wi-Fi Gratis 100Mbps</h3>
+                <h3 class="feature-card-title">Free Wifi & Welcome Drink</h3>
                 <p class="feature-card-desc">
-                    Akses internet nirkabel super cepat tanpa kuota untuk kebutuhan kerja online, streaming, dan hiburan tanpa hambatan.
+                    Fasilitas internet wifi gratis serta minuman penyambutan (welcome drink) menyegarkan saat check-in.
                 </p>
             </div>
 
-            <!-- Feature 3: Smart TV Netflix -->
-            <div class="feature-card animate-on-scroll delay-3">
-                <div class="feature-icon-box">
-                    <i class="fa-solid fa-tv"></i>
-                </div>
-                <h3 class="feature-card-title">Smart TV & Hiburan</h3>
-                <p class="feature-card-desc">
-                    Televisi pintar layar lebar lengkap dengan aplikasi tayangan streaming untuk santai bersama keluarga.
-                </p>
-            </div>
-
-            <!-- Feature 4: Kamar Mandi Dalam & Water Heater -->
-            <div class="feature-card animate-on-scroll delay-1">
-                <div class="feature-icon-box">
-                    <i class="fa-solid fa-shower"></i>
-                </div>
-                <h3 class="feature-card-title">Kamar Mandi Dalam & Air Hangat</h3>
-                <p class="feature-card-desc">
-                    Kamar mandi pribadi yang bersih dilengkapi shower pemanas air (water heater) dan perlengkapan mandi lengkap.
-                </p>
-            </div>
-
-            <!-- Feature 5: Parkir Luas & Aman -->
-            <div class="feature-card animate-on-scroll delay-2">
-                <div class="feature-icon-box">
-                    <i class="fa-solid fa-square-parking"></i>
-                </div>
-                <h3 class="feature-card-title">Area Parkir Luas Gratis</h3>
-                <p class="feature-card-desc">
-                    Halaman parkir mobil dan sepeda motor yang aman tepat di depan lokasi penginapan tanpa biaya tambahan.
-                </p>
-            </div>
-
-            <!-- Feature 6: Keamanan 24 Jam -->
+            <!-- Feature 6: CCTV 24 Jam & BBQ Request -->
             <div class="feature-card animate-on-scroll delay-3">
                 <div class="feature-icon-box">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h3 class="feature-card-title">Keamanan 24 Jam & CCTV</h3>
+                <h3 class="feature-card-title">CCTV 24 Jam & BBQ Request</h3>
                 <p class="feature-card-desc">
-                    Sistem keamanan lingkungan yang terjamin dengan kamera pengawas CCTV 24 jam untuk privasi dan ketenangan Anda.
+                    Kamera pengawas 24 jam menjamin keamanan area glamping, serta tersedia perlengkapan BBQ sesuai permintaan.
                 </p>
             </div>
         </div>
@@ -274,10 +274,10 @@
     <section id="kamars" class="bg-soft-section section-wrapper" style="max-width: 100%;">
         <div style="max-width: 1280px; margin: 0 auto;">
             <div class="section-header animate-on-scroll">
-                <span class="badge-soft">Available Suites</span>
-                <h2 class="section-title">Pilihan Kamar & Unit Homestay</h2>
+                <span class="badge-soft">Available Units</span>
+                <h2 class="section-title">Pilihan Unit Glamping (G1 - G5)</h2>
                 <p class="section-desc">
-                    Pilih tipe kamar yang paling sesuai dengan kebutuhan menginap harian maupun mingguan Anda.
+                    Nikmati sensasi menginap di tenda premium tepi Pantai Gedambaan Kotabaru dengan rate Weekday Rp 450.000 & Weekend Rp 550.000.
                 </p>
             </div>
 
@@ -441,7 +441,7 @@
             </span>
             <h2 class="section-title">Apa Kata Tamu Di Google Maps?</h2>
             <p class="section-desc">
-                Pengalaman nyata dari tamu yang telah menikmati menginap di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}.
+                Pengalaman nyata dari tamu yang telah menikmati menginap di {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}.
             </p>
         </div>
 
@@ -586,7 +586,7 @@
                 <div class="nusakos-map-box animate-on-scroll delay-1">
                     @php
                         $rawGmapLink = $setting->gmap_link;
-                        $addressQuery = $setting->address ?: ($setting->homestay_name ?? 'Faradisa HomeStay');
+                        $addressQuery = $setting->address ?: ($setting->homestay_name ?? 'Gedambaan Glamping');
                         
                         if (!empty($rawGmapLink) && (str_contains($rawGmapLink, 'embed') || str_contains($rawGmapLink, 'output=embed'))) {
                             $embedSrc = $rawGmapLink;
@@ -618,7 +618,7 @@
                         <div>
                             <div class="nusakos-info-label">Alamat</div>
                             <div class="nusakos-info-text">
-                                {!! nl2br(e($setting->address ?? 'Komplek Green Tasbih Jalan Tawaf, IX Kel No.2, RT.06/RW.04, Loktabat Selatan, Kec. Banjarbaru Selatan, Kota Banjar Baru, Kalimantan Selatan 70714')) !!}
+                                {!! nl2br(e($setting->address ?? 'Tepi Pantai Gedambaan, Kotabaru, Kalimantan Selatan')) !!}
                             </div>
                         </div>
                     </div>
@@ -629,7 +629,7 @@
                             <i class="fa-brands fa-whatsapp"></i>
                         </div>
                         <div>
-                            <div class="nusakos-info-label">WhatsApp</div>
+                            <div class="nusakos-info-label">WhatsApp Admin</div>
                             <div class="nusakos-info-text">
                                 <a href="https://wa.me/{{ $waClean }}" target="_blank" style="color: var(--primary); font-weight: 700;">
                                     +{{ $waClean }}
@@ -644,9 +644,9 @@
                             <i class="fa-solid fa-envelope"></i>
                         </div>
                         <div>
-                            <div class="nusakos-info-label">Email</div>
+                            <div class="nusakos-info-label">Email / Info</div>
                             <div class="nusakos-info-text">
-                               faradisahomestaybjb@gmail.com
+                               info@gedambaanglamping.com
                             </div>
                         </div>
                     </div>
@@ -681,20 +681,18 @@
                     <i class="fa-solid fa-house-chimney" style="color: var(--primary); font-size: 1.25rem;"></i>
                 @endif
                 <span style="font-size: 1.15rem; font-weight: 700; color: white;">
-                    {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}
+                    {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}
                 </span>
             </div>
 
             <div style="font-size: 0.75rem; color: var(--text-slate-400);">
-                © {{ date('Y') }} {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}. All rights reserved.
+                © {{ date('Y') }} {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}. All rights reserved.
             </div>
 
             <div style="display: flex; align-items: center; gap: 1.25rem; font-size: 0.85rem;">
-                <a href="#kamars" style="color: var(--text-slate-400);">Kamar</a>
+                <a href="#kamars" style="color: var(--text-slate-400);">Glamping Units</a>
                 <span>•</span>
                 <a href="#fasilitas" style="color: var(--text-slate-400);">Fasilitas</a>
-                {{-- <span>•</span>
-                <a href="{{ route('login') }}" style="color: var(--gold-soft);">Admin Login</a> --}}
             </div>
         </div>
     </footer>
@@ -703,7 +701,7 @@
     <!-- ==========================================
          9. FLOATING WHATSAPP BUTTON
          ========================================== -->
-    <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Faradisa HomeStay') }},%20saya%20ingin%20reservasi%20kamar." target="_blank" class="floating-wa-btn">
+    <a href="https://wa.me/{{ $waClean }}?text=Halo%20Admin%20{{ urlencode($setting->homestay_name ?? 'Gedambaan Glamping') }},%20saya%20ingin%20reservasi%20unit%20glamping." target="_blank" class="floating-wa-btn">
         <i class="fa-brands fa-whatsapp" style="font-size: 1.25rem;"></i>
         <span>Tanya Admin</span>
     </a>

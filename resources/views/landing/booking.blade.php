@@ -21,8 +21,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $room->name }} - {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</title>
-    <meta name="description" content="Detail dan reservasi {{ $room->name }} di {{ $setting->homestay_name ?? 'Faradisa HomeStay' }}.">
+    <title>{{ $room->name }} - {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</title>
+    <meta name="description" content="Detail dan reservasi {{ $room->name }} di {{ $setting->homestay_name ?? 'Gedambaan Glamping' }}.">
     
     <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -663,7 +663,7 @@
                 @else
                     <i class="fa-solid fa-house-chimney" style="color: var(--nusakos-brown);"></i>
                 @endif
-                <span>{{ $setting->homestay_name ?? 'Faradisa HomeStay' }}</span>
+                <span>{{ $setting->homestay_name ?? 'Gedambaan Glamping' }}</span>
             </a>
         </div>
         <div>
@@ -885,7 +885,7 @@
                 </div>
                 <div class="help-item">
                     <i class="fa-solid fa-envelope"></i>
-                    <span>reservasi@faradisahomestay.com</span>
+                    <span>info@gedambaanglamping.com</span>
                 </div>
             </div>
         </div>
@@ -1362,7 +1362,7 @@
                 extrasText = `- *Extra Fasilitas*: ${names}\n`;
             }
 
-            let waText = `Halo Admin {{ $setting->homestay_name ?? 'Faradisa HomeStay' }},\n\n` +
+            let waText = `Halo Admin {{ $setting->homestay_name ?? 'Gedambaan Glamping' }},\n\n` +
                          `Saya ingin mengonfirmasi *Pemesanan Kamar* dengan data berikut:\n\n` +
                          `- *Kode Booking*: *#${b.booking_code}*\n` +
                          `- *Status*: Pending (Menunggu Pembayaran)\n` +

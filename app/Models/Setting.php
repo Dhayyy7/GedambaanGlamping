@@ -40,10 +40,10 @@ class Setting extends Model
             ['id' => 1],
             [
                 'logo' => null,
-                'homestay_name' => 'Faradisa HomeStay',
-                'wa_number' => '081234567890',
-                'address' => 'Jl. Utama Homestay, Akses Mudah & Aman',
-                'gmap_link' => 'https://maps.google.com/?q=Faradisa+HomeStay',
+                'homestay_name' => 'Gedambaan Glamping',
+                'wa_number' => '08776905151',
+                'address' => 'Tepi Pantai Gedambaan, Kotabaru, Kalimantan Selatan',
+                'gmap_link' => 'https://maps.google.com/?q=Pantai+Gedambaan+Kotabaru',
                 'media_assets' => [],
             ]
         );
