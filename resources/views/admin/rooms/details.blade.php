@@ -163,6 +163,14 @@
         transform: rotate(-45deg);
     }
 
+    .day-maintenance {
+        background-color: #ffedd5;
+        color: #ea580c;
+        border: 1px solid #fed7aa;
+        font-weight: 800;
+        position: relative;
+    }
+
     .badge-code {
         background-color: #e0e7ff;
         color: #4338ca;
@@ -196,7 +204,7 @@
                 Detail Kamar & Kalender Ketersediaan Booking
             </h2>
             <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.2rem;">
-                Tanggal terbooking ditandai <span style="color: #dc2626; font-weight: 700;">(X) Merah</span>. Hari <span style="color: #7e22ce; font-weight: 700;">Weekend & Tgl Merah</span> ditandai <span style="color: #7e22ce; font-weight: 700;">Ungu</span>. <strong>Klik tanggal merah</strong> untuk membuka detail pemesanan.
+                Tanggal terbooking ditandai <span style="color: #dc2626; font-weight: 700;">(X) Merah</span>. Hari <span style="color: #7e22ce; font-weight: 700;">Weekend & Tgl Merah</span> ditandai <span style="color: #7e22ce; font-weight: 700;">Ungu</span>. Status <span style="color: #ea580c; font-weight: 700;">Maintenance (MT)</span> ditandai <span style="color: #ea580c; font-weight: 700;">Oranye</span>. <strong>Klik tanggal merah</strong> untuk membuka detail pemesanan.
             </div>
         </div>
 
@@ -247,6 +255,16 @@
                     }
                 }
 
+                // Build map of maintenance dates 'YYYY-MM-DD' => note
+                $maintenanceMap = [];
+                foreach($room->maintenances as $m) {
+                    $mStart = \Carbon\Carbon::parse($m->start_date);
+                    $mEnd = \Carbon\Carbon::parse($m->end_date);
+                    for ($dt = $mStart->copy(); $dt->lte($mEnd); $dt->addDay()) {
+                        $maintenanceMap[$dt->format('Y-m-d')] = $m->note ?? 'Pemeliharaan / Maintenance';
+                    }
+                }
+
                 $imgs = is_array($room->images) ? array_values(array_filter($room->images)) : [];
                 $validImgs = [];
                 foreach ($imgs as $im) {
@@ -264,6 +282,9 @@
                         <div>
                             <span class="badge-code">{{ $room->code }}</span>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 0.35rem;">{{ $room->name }}</h3>
+                            <button type="button" class="btn-submit" style="background-color: #ea580c; width: auto; padding: 0.25rem 0.6rem; font-size: 0.72rem; margin-top: 0.35rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);" onclick="openMaintenanceModal({{ $room->id }}, '{{ addslashes($room->name) }}')">
+                                <i class="fa-solid fa-wrench"></i> Maintenance Kamar
+                            </button>
                         </div>
                         <div style="text-align: right;">
                             <div style="font-size: 1rem; font-weight: 800; color: #16a34a;">Rp {{ number_format($room->final_price, 0, ',', '.') }}</div>
@@ -310,6 +331,7 @@
                         <div style="display: flex; gap: 0.4rem; font-size: 0.65rem; font-weight: 600; flex-wrap: wrap;">
                             <span style="color: #16a34a;">🟢 Bebas</span>
                             <span style="color: #7e22ce;">🟣 Weekend/Libur</span>
+                            <span style="color: #ea580c;">🟠 Maintenance</span>
                             <span style="color: #dc2626;">🔴 X Terbooking</span>
                         </div>
                     </div>
@@ -337,6 +359,9 @@
                                 $isBooked = isset($bookedMap[$dStr]);
                                 $bookInfo = $isBooked ? $bookedMap[$dStr] : null;
 
+                                $isMaintenance = isset($maintenanceMap[$dStr]);
+                                $maintNote = $isMaintenance ? $maintenanceMap[$dStr] : null;
+
                                 $dtCarbon = \Carbon\Carbon::createFromDate((int)$calYear, (int)$calMonth, $d);
                                 $dayOfWeek = $dtCarbon->dayOfWeek; // 0 = Sun, 5 = Fri, 6 = Sat
                                 $isWeekendOrHoliday = in_array($dayOfWeek, [0, 5, 6]) || in_array($dStr, $holidayDates ?? []);
@@ -346,6 +371,10 @@
                                 <a href="{{ route('admin.bookings.index') }}?code={{ $bookInfo['code'] }}" class="calendar-day-cell day-booked" style="text-decoration: none;" title="Terbooking oleh: {{ $bookInfo['customer'] }} ({{ $bookInfo['code'] }}) - Klik untuk lihat detail pemesanan">
                                     {{ $d }}
                                 </a>
+                            @elseif($isMaintenance)
+                                <div class="calendar-day-cell day-maintenance" title="Maintenance / Perbaikan: {{ $maintNote }}">
+                                    {{ $d }}
+                                </div>
                             @elseif($isWeekendOrHoliday)
                                 <div class="calendar-day-cell day-weekend" title="Rate Weekend / Tanggal Merah">
                                     {{ $d }}
@@ -445,6 +474,100 @@
     </div>
 </div>
 
+<!-- Modal Maintenance Kamar -->
+<div class="modal-backdrop" id="maintenanceModal">
+    <div class="modal-card" style="max-width: 620px;">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title"><i class="fa-solid fa-wrench" style="color: #ea580c;"></i> Kelola Maintenance Kamar</h3>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.2rem;">
+                    Kamar: <strong id="maint_room_name" style="color: #0f172a;"></strong>
+                </div>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeMaintenanceModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Tambah Maintenance Kamar -->
+        <form action="{{ route('admin.room-maintenances.store') }}" method="POST" style="background: #fff7ed; padding: 1.1rem; border-radius: 14px; border: 1px solid #ffedd5; margin-bottom: 1.25rem;">
+            @csrf
+            <input type="hidden" name="room_id" id="maint_room_id">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="maint_start_date" class="form-label">Tgl Mulai MT <span style="color: #dc2626;">*</span></label>
+                    <input type="date" id="maint_start_date" name="start_date" class="form-input" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="maint_end_date" class="form-label">Tgl Selesai MT <span style="color: #dc2626;">*</span></label>
+                    <input type="date" id="maint_end_date" name="end_date" class="form-input" required>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label for="maint_note" class="form-label">Keterangan / Alasan Perbaikan</label>
+                <input type="text" id="maint_note" name="note" class="form-input" placeholder="misal: Perbaikan AC, Cat ulang dinding, dsb.">
+            </div>
+
+            <div style="text-align: right;">
+                <button type="submit" class="btn-submit" style="background-color: #ea580c; width: auto; padding: 0.45rem 1rem; font-size: 0.8rem; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Simpan Jadwal Maintenance</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Daftar Maintenance Terdaftar -->
+        <div>
+            <label class="form-label" style="margin-bottom: 0.5rem; display: block;">
+                <span>Daftar Maintenance Terdaftar Kamar Ini</span>
+            </label>
+            <div style="max-height: 220px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+                <table class="data-table" style="font-size: 0.8rem;">
+                    <thead>
+                        <tr>
+                            <th>Rentang Tanggal MT</th>
+                            <th>Keterangan</th>
+                            <th style="text-align: center; width: 60px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($rooms as $room)
+                            @foreach($room->maintenances as $m)
+                                <tr class="maint-row maint-room-{{ $room->id }}" style="display: none;">
+                                    <td style="font-weight: 700; color: #ea580c;">
+                                        {{ \Carbon\Carbon::parse($m->start_date)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($m->end_date)->format('d M Y') }}
+                                    </td>
+                                    <td>{{ $m->note ?? 'Perbaikan Kamar' }}</td>
+                                    <td style="text-align: center;">
+                                        <form action="{{ route('admin.room-maintenances.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal maintenance ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" style="background: #fee2e2; color: #dc2626; border: none; padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer;" title="Hapus">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                        <tr class="maint-empty" style="display: none;">
+                            <td colspan="3" style="text-align: center; color: #94a3b8; font-style: italic;">Belum ada jadwal maintenance terdaftar untuk kamar ini.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+            <button type="button" class="btn-edit" style="background-color: #f1f5f9; color: #475569; width: auto; padding: 0.5rem 1.2rem;" onclick="closeMaintenanceModal()">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -454,6 +577,30 @@
     }
     function closeHolidayModal() {
         document.getElementById('holidayModal').classList.remove('show');
+    }
+
+    function openMaintenanceModal(roomId, roomName) {
+        document.getElementById('maint_room_id').value = roomId;
+        document.getElementById('maint_room_name').innerText = roomName;
+        
+        // Hide all maintenance rows
+        document.querySelectorAll('.maint-row').forEach(el => el.style.display = 'none');
+        
+        // Show rows for selected room
+        const roomRows = document.querySelectorAll('.maint-room-' + roomId);
+        if (roomRows.length > 0) {
+            roomRows.forEach(el => el.style.display = 'table-row');
+            const emptyRow = document.querySelector('.maint-empty');
+            if (emptyRow) emptyRow.style.display = 'none';
+        } else {
+            const emptyRow = document.querySelector('.maint-empty');
+            if (emptyRow) emptyRow.style.display = 'table-row';
+        }
+        
+        document.getElementById('maintenanceModal').classList.add('show');
+    }
+    function closeMaintenanceModal() {
+        document.getElementById('maintenanceModal').classList.remove('show');
     }
 </script>
 @endsection

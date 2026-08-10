@@ -283,6 +283,14 @@
             cursor: not-allowed;
         }
 
+        .day-maintenance {
+            background-color: #ffedd5;
+            color: #ea580c;
+            border: 1px solid #fed7aa;
+            font-weight: 700;
+            cursor: not-allowed;
+        }
+
         .btn-pesan-room {
             display: flex;
             align-items: center;
@@ -394,6 +402,16 @@
                         }
                     }
 
+                    // Build map of maintenance dates 'YYYY-MM-DD' => note
+                    $maintenanceMap = [];
+                    foreach($room->maintenances as $m) {
+                        $mStart = \Carbon\Carbon::parse($m->start_date);
+                        $mEnd = \Carbon\Carbon::parse($m->end_date);
+                        for ($dt = $mStart->copy(); $dt->lte($mEnd); $dt->addDay()) {
+                            $maintenanceMap[$dt->format('Y-m-d')] = $m->note ?? 'Pemeliharaan / Maintenance';
+                        }
+                    }
+
                     $imgs = is_array($room->images) ? array_values(array_filter($room->images)) : [];
                     $validImgs = [];
                     foreach ($imgs as $im) {
@@ -463,6 +481,7 @@
                             <div style="display: flex; gap: 0.65rem; font-size: 0.68rem; font-weight: 600; color: var(--nusakos-text-muted); flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 0.25rem;"><span class="legend-dot" style="background: #ffffff; border: 1px solid #d1d5db;"></span> Weekday</div>
                                 <div style="display: flex; align-items: center; gap: 0.25rem;"><span class="legend-dot" style="background: #f3e8ff; border: 1px solid #c084fc;"></span> Weekend/Libur</div>
+                                <div style="display: flex; align-items: center; gap: 0.25rem;"><span class="legend-dot" style="background: #ffedd5; border: 1px solid #fed7aa;"></span> Maintenance</div>
                                 <div style="display: flex; align-items: center; gap: 0.25rem;"><span class="legend-dot" style="background: #d8c4b0;"></span> Terisi</div>
                             </div>
                         </div>
@@ -483,11 +502,13 @@
                                 <div class="calendar-day-cell" style="background: transparent;"></div>
                             @endfor
 
-                            <!-- Days of Month -->
+                             <!-- Days of Month -->
                             @for($d = 1; $d <= $daysInMonth; $d++)
                                 @php
                                     $dStr = sprintf('%04d-%02d-%02d', $calYear, $calMonth, $d);
                                     $isBooked = isset($bookedMap[$dStr]);
+                                    $isMaintenance = isset($maintenanceMap[$dStr]);
+                                    $maintNote = $isMaintenance ? $maintenanceMap[$dStr] : null;
 
                                     $dtCarbon = \Carbon\Carbon::createFromDate((int)$calYear, (int)$calMonth, $d);
                                     $dayOfWeek = $dtCarbon->dayOfWeek; // 0 = Sun, 5 = Fri, 6 = Sat
@@ -496,6 +517,10 @@
 
                                 @if($isBooked)
                                     <div class="calendar-day-cell day-booked" title="Terbooking">
+                                        {{ $d }}
+                                    </div>
+                                @elseif($isMaintenance)
+                                    <div class="calendar-day-cell day-maintenance" title="Maintenance: {{ $maintNote }}">
                                         {{ $d }}
                                     </div>
                                 @elseif($isWeekendOrHoliday)

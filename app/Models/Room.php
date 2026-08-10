@@ -41,6 +41,14 @@ class Room extends Model
     }
 
     /**
+     * Get the maintenance schedules for the room.
+     */
+    public function maintenances()
+    {
+        return $this->hasMany(RoomMaintenance::class);
+    }
+
+    /**
      * Calculate weekday price after discount percentage.
      */
     public function getFinalPriceAttribute()

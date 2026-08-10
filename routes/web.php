@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ExtraFacilityController;
 use App\Http\Controllers\Admin\HolidayController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\RoomMaintenanceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 
@@ -39,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
     // Custom Holiday Routes
     Route::post('/admin/holidays', [HolidayController::class, 'store'])->name('admin.holidays.store');
     Route::delete('/admin/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('admin.holidays.destroy');
+
+    // Room Maintenance Routes
+    Route::post('/admin/room-maintenances', [RoomMaintenanceController::class, 'store'])->name('admin.room-maintenances.store');
+    Route::delete('/admin/room-maintenances/{maintenance}', [RoomMaintenanceController::class, 'destroy'])->name('admin.room-maintenances.destroy');
 
     // Booking Management Routes (Accessible to Auth Users/Staff)
     Route::get('/admin/bookings', [BookingController::class, 'index'])->name('admin.bookings.index');

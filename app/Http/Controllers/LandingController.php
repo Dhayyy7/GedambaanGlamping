@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\ExtraFacility;
 use App\Models\Room;
+use App\Models\RoomMaintenance;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class LandingController extends Controller
         $calMonth = sprintf('%02d', (int) $request->input('cal_month', date('m')));
         $calYear = (int) $request->input('cal_year', date('Y'));
 
-        $rooms = Room::with(['facilities', 'bookings' => function($q) {
+        $rooms = Room::with(['facilities', 'maintenances', 'bookings' => function($q) {
             $q->whereIn('status', [1, 2, 3, 4]);
         }])->latest()->get();
 
@@ -49,7 +50,7 @@ class LandingController extends Controller
      */
     public function booking(Room $room)
     {
-        $room->load(['facilities', 'bookings']);
+        $room->load(['facilities', 'maintenances', 'bookings']);
 
         $setting = Setting::getSetting();
 
@@ -68,6 +69,19 @@ class LandingController extends Controller
             }
         }
 
+        // Calculate maintenance dates
+        $maintenanceDates = [];
+        foreach ($room->maintenances as $m) {
+            if ($m->start_date && $m->end_date) {
+                $curr = Carbon::parse($m->start_date);
+                $end = Carbon::parse($m->end_date);
+                while ($curr <= $end) {
+                    $maintenanceDates[] = $curr->format('Y-m-d');
+                    $curr->addDay();
+                }
+            }
+        }
+
         // Get National Holiday Dates (Current & Next Year)
         $holidayService = app(\App\Services\HolidayService::class);
         $currentYear = (int) date('Y');
@@ -76,7 +90,7 @@ class LandingController extends Controller
             $holidayService->getHolidayDates($currentYear + 1)
         )));
 
-        return view('landing.booking', compact('setting', 'room', 'extraFacilities', 'bookedDates', 'holidayDates'));
+        return view('landing.booking', compact('setting', 'room', 'extraFacilities', 'bookedDates', 'maintenanceDates', 'holidayDates'));
     }
 
     /**
@@ -115,6 +129,21 @@ class LandingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Kamar sudah terbooking pada tanggal yang dipilih. Silakan pilih tanggal lain.'
+            ], 422);
+        }
+
+        // Check maintenance conflict
+        $isMaintenanceConflict = RoomMaintenance::where('room_id', $roomId)
+            ->where(function ($q) use ($checkInStr, $checkOutStr) {
+                $q->where('start_date', '<', $checkOutStr)
+                  ->where('end_date', '>=', $checkInStr);
+            })
+            ->exists();
+
+        if ($isMaintenanceConflict) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal yang dipilih. Silakan pilih tanggal lain.'
             ], 422);
         }
 

@@ -537,6 +537,14 @@
             cursor: not-allowed;
         }
 
+        .date-cell.maintenance {
+            background: #ffedd5;
+            color: #ea580c;
+            border: 1px solid #fed7aa;
+            font-weight: 800;
+            cursor: not-allowed;
+        }
+
         .date-cell.weekend-holiday {
             background: #f3e8ff;
             color: #7e22ce;
@@ -813,6 +821,7 @@
                 <div class="calendar-legend" style="gap: 0.65rem; flex-wrap: wrap;">
                     <div><span class="legend-dot" style="background: #ffffff; border: 1px solid #d1d5db;"></span> Weekday</div>
                     <div><span class="legend-dot" style="background: #f3e8ff; border: 1px solid #c084fc;"></span> Weekend/Libur</div>
+                    <div><span class="legend-dot" style="background: #ffedd5; border: 1px solid #fed7aa;"></span> Maintenance</div>
                     <div><span class="legend-dot" style="background: #d8c4b0;"></span> Terisi</div>
                 </div>
 
@@ -847,17 +856,20 @@
                             $dtCarbon = $now->copy()->day($day);
                             $dateStr = $dtCarbon->format('Y-m-d');
                             $isBooked = in_array($dateStr, $bookedDates);
+                            $isMaintenance = in_array($dateStr, $maintenanceDates ?? []);
                             $dayOfWeek = $dtCarbon->dayOfWeek; // 0 = Sun, 5 = Fri, 6 = Sat
                             $isWeekendOrHoliday = in_array($dayOfWeek, [0, 5, 6]) || in_array($dateStr, $holidayDates ?? []);
 
                             $cellClass = 'available';
                             if ($isBooked) {
                                 $cellClass = 'booked';
+                            } elseif ($isMaintenance) {
+                                $cellClass = 'maintenance';
                             } elseif ($isWeekendOrHoliday) {
                                 $cellClass = 'weekend-holiday';
                             }
                         @endphp
-                        <div class="date-cell {{ $cellClass }}" title="{{ $isWeekendOrHoliday ? 'Rate Weekend / Tanggal Merah' : '' }}">
+                        <div class="date-cell {{ $cellClass }}" title="{{ $isBooked ? 'Terbooking' : ($isMaintenance ? 'Maintenance / Pemeliharaan Kamar' : ($isWeekendOrHoliday ? 'Rate Weekend / Tanggal Merah' : 'Kamar Bebas')) }}">
                             {{ $day }}
                         </div>
                     @endfor
@@ -1044,6 +1056,7 @@
         const roomWeekendPrice = {{ $room->weekend_price && $room->weekend_price > 0 ? $room->weekend_price : $room->price }};
         const roomDiscount = {{ $room->discount ?? 0 }};
         const holidayDatesList = @json($holidayDates ?? []);
+        const maintenanceDatesList = @json($maintenanceDates ?? []);
         const waPhone = '{{ $waClean }}';
         const roomName = '{{ e($room->name) }}';
         const roomCode = '{{ e($room->code) }}';
@@ -1228,6 +1241,26 @@
             if (!customerPhone) {
                 Swal.fire({ icon: 'warning', title: 'Nomor WhatsApp Wajib Diisi', text: 'Silakan masukkan nomor WhatsApp Anda.', confirmColor: '#8c7355' });
                 return;
+            }
+
+            // Check if selected range includes maintenance dates
+            if (checkInDate && checkOutDate) {
+                let checkCurr = new Date(checkInDate);
+                let checkEnd = new Date(checkOutDate);
+                let isMaintConflict = false;
+                while (checkCurr < checkEnd) {
+                    let dStr = checkCurr.toISOString().split('T')[0];
+                    if (Array.isArray(maintenanceDatesList) && maintenanceDatesList.includes(dStr)) {
+                        isMaintConflict = true;
+                        break;
+                    }
+                    checkCurr.setDate(checkCurr.getDate() + 1);
+                }
+
+                if (isMaintConflict) {
+                    Swal.fire({ icon: 'error', title: 'Kamar Dalam Pemeliharaan', text: 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal yang dipilih. Silakan pilih tanggal lain.', confirmColor: '#8c7355' });
+                    return;
+                }
             }
 
             const extraIds = [];

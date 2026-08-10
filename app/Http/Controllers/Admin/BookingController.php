@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
+use App\Models\RoomMaintenance;
 use App\Models\ExtraFacility;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -129,6 +130,20 @@ class BookingController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Kamar sudah terbooking pada tanggal tersebut.');
+        }
+
+        // Check maintenance conflict
+        $isMaintenanceConflict = RoomMaintenance::where('room_id', $roomId)
+            ->where(function ($q) use ($checkInStr, $checkOutStr) {
+                $q->where('start_date', '<', $checkOutStr)
+                  ->where('end_date', '>=', $checkInStr);
+            })
+            ->exists();
+
+        if ($isMaintenanceConflict) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal tersebut.');
         }
 
         $room = Room::findOrFail($roomId);
@@ -258,6 +273,20 @@ class BookingController extends Controller
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Kamar sudah terbooking pada tanggal tersebut.');
+            }
+
+            // Check maintenance conflict
+            $isMaintenanceConflict = RoomMaintenance::where('room_id', $roomId)
+                ->where(function ($q) use ($checkInStr, $checkOutStr) {
+                    $q->where('start_date', '<', $checkOutStr)
+                      ->where('end_date', '>=', $checkInStr);
+                })
+                ->exists();
+
+            if ($isMaintenanceConflict) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal tersebut.');
             }
         }
 
