@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\ExtraFacilityController;
 use App\Http\Controllers\Admin\HolidayController;
@@ -33,6 +34,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/report/pdf', [DashboardController::class, 'reportPdf'])->name('admin.dashboard.report.pdf');
     Route::get('/admin/dashboard/report/excel', [DashboardController::class, 'reportExcel'])->name('admin.dashboard.report.excel');
+
+    // Catatan Pengeluaran Routes (Accessible to Auth Users/Staff)
+    Route::get('/admin/expenses', [ExpenseController::class, 'index'])->name('admin.expenses.index');
+    Route::get('/admin/expenses/report/pdf', [ExpenseController::class, 'reportPdf'])->name('admin.expenses.report.pdf');
+    Route::get('/admin/expenses/report/excel', [ExpenseController::class, 'reportExcel'])->name('admin.expenses.report.excel');
+    Route::post('/admin/expenses', [ExpenseController::class, 'store'])->name('admin.expenses.store');
+    Route::put('/admin/expenses/{expense}', [ExpenseController::class, 'update'])->name('admin.expenses.update');
+    Route::delete('/admin/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('admin.expenses.destroy');
 
     // Room Details Route (Accessible to All Auth Users/Staff)
     Route::get('/admin/rooms/details', [RoomController::class, 'details'])->name('admin.rooms.details');

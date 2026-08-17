@@ -542,6 +542,12 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.expenses.index') }}" class="nav-link {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Catatan Pengeluaran</span>
+                </a>
+            </li>
 
             <div class="menu-category"> Pengelolaan </div>
             @if(Auth::check() && Auth::user()->role_user === 'Super Admin')
