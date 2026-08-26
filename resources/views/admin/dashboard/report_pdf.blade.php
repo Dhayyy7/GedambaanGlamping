@@ -55,8 +55,8 @@
 
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
             margin-bottom: 20px;
         }
 
@@ -204,7 +204,21 @@
         </div>
         <div class="kpi-card" style="background: #fef3c7;">
             <div class="label">Total Pendapatan</div>
-            <div class="val" style="color: #b45309; font-size: 12px;">Rp {{ number_format($summary['revenue'], 0, ',', '.') }}</div>
+            <div class="val" style="color: #b45309; font-size: 11px;">Rp {{ number_format($summary['revenue'], 0, ',', '.') }}</div>
+        </div>
+        <div class="kpi-card" style="background: #fee2e2;">
+            <div class="label">Total Pengeluaran</div>
+            <div class="val" style="color: #991b1b; font-size: 11px;">Rp {{ number_format($summary['expense'], 0, ',', '.') }}</div>
+        </div>
+        <div class="kpi-card" style="background: #e0f2fe;">
+            <div class="label">Pendapatan Bersih</div>
+            <div class="val" style="color: #075985; font-size: 11px;">
+                @if($summary['net_income'] < 0)
+                    -Rp {{ number_format(abs($summary['net_income']), 0, ',', '.') }}
+                @else
+                    Rp {{ number_format($summary['net_income'], 0, ',', '.') }}
+                @endif
+            </div>
         </div>
     </div>
 

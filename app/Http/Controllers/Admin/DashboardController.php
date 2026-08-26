@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\Booking;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -27,6 +28,12 @@ class DashboardController extends Controller
             ->whereYear('check_in_date', $currentYear)
             ->whereMonth('check_in_date', (int)$currentMonth)
             ->sum('total_price');
+
+        $monthlyExpense = Expense::whereYear('tanggal', $currentYear)
+            ->whereMonth('tanggal', (int)$currentMonth)
+            ->sum('harga');
+
+        $netIncome = $monthlyRevenue - $monthlyExpense;
 
         // 2. Prepare Grouped Bar Chart Data for selected month
         $daysInMonth = Carbon::createFromDate((int)$currentYear, (int)$currentMonth, 1)->daysInMonth;
@@ -52,6 +59,8 @@ class DashboardController extends Controller
                 'lunas' => $chartDataLunas,
                 'batal' => $chartDataBatal,
                 'formatted_revenue' => 'Rp ' . number_format($monthlyRevenue, 0, ',', '.'),
+                'formatted_expense' => 'Rp ' . number_format($monthlyExpense, 0, ',', '.'),
+                'formatted_net' => ($netIncome >= 0 ? 'Rp ' : '-Rp ') . number_format(abs($netIncome), 0, ',', '.'),
             ]);
         }
 
@@ -59,6 +68,8 @@ class DashboardController extends Controller
             'total_rooms' => $totalRooms,
             'active_bookings' => $activeBookings,
             'monthly_revenue' => $monthlyRevenue,
+            'monthly_expense' => $monthlyExpense,
+            'net_income' => $netIncome,
             'pending_count' => $pendingCount,
         ];
 
@@ -92,13 +103,21 @@ class DashboardController extends Controller
             ->orderBy('check_in_date', 'asc')
             ->get();
 
+        $expenses = Expense::whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->sum('harga');
+
+        $revenue = $bookings->whereIn('status', [2, 3, 4])->sum('total_price');
+
         $summary = [
             'total' => $bookings->count(),
             'lunas' => $bookings->whereIn('status', [2, 3])->count(),
             'dp' => $bookings->where('status', 4)->count(),
             'pending' => $bookings->where('status', 1)->count(),
             'batal' => $bookings->where('status', 0)->count(),
-            'revenue' => $bookings->whereIn('status', [2, 3, 4])->sum('total_price'),
+            'revenue' => $revenue,
+            'expense' => $expenses,
+            'net_income' => $revenue - $expenses,
         ];
 
         $monthName = Carbon::createFromDate($year, $month, 1)->translatedFormat('F');
@@ -128,13 +147,21 @@ class DashboardController extends Controller
             ->orderBy('check_in_date', 'asc')
             ->get();
 
+        $expenses = Expense::whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->sum('harga');
+
+        $revenue = $bookings->whereIn('status', [2, 3, 4])->sum('total_price');
+
         $summary = [
             'total' => $bookings->count(),
             'lunas' => $bookings->whereIn('status', [2, 3])->count(),
             'dp' => $bookings->where('status', 4)->count(),
             'pending' => $bookings->where('status', 1)->count(),
             'batal' => $bookings->where('status', 0)->count(),
-            'revenue' => $bookings->whereIn('status', [2, 3, 4])->sum('total_price'),
+            'revenue' => $revenue,
+            'expense' => $expenses,
+            'net_income' => $revenue - $expenses,
         ];
 
         return response()->view('admin.dashboard.report_excel', compact(

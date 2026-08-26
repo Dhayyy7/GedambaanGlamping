@@ -45,6 +45,8 @@
     .icon-emerald { background-color: #dcfce7; color: #16a34a; }
     .icon-amber { background-color: #fef3c7; color: #d97706; }
     .icon-rose { background-color: #ffe4e6; color: #e11d48; }
+    .icon-red { background-color: #fee2e2; color: #dc2626; }
+    .icon-cyan { background-color: #e0f2fe; color: #0284c7; }
 
     /* Red Dot Pulsing Notification Badge */
     .notification-badge-dot {
@@ -186,7 +188,35 @@
             </div>
         </div>
 
-        <!-- Card 4: Booking Pending Notification -->
+        <!-- Card 4: Pengeluaran Bulan Ini -->
+        <a href="{{ route('admin.expenses.index') }}" class="stat-card">
+            <div class="stat-icon icon-red">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="stat-details">
+                <h3>Pengeluaran Bulan Ini</h3>
+                <div class="value" id="monthly_expense_display">Rp {{ number_format($stats['monthly_expense'], 0, ',', '.') }}</div>
+            </div>
+        </a>
+
+        <!-- Card 5: Total (Pendapatan - Pengeluaran) -->
+        <div class="stat-card">
+            <div class="stat-icon icon-cyan">
+                <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div class="stat-details">
+                <h3>Total (Pendapatan - Pengeluaran)</h3>
+                <div class="value" id="net_income_display">
+                    @if($stats['net_income'] < 0)
+                        -Rp {{ number_format(abs($stats['net_income']), 0, ',', '.') }}
+                    @else
+                        Rp {{ number_format($stats['net_income'], 0, ',', '.') }}
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6: Booking Pending Notification -->
         <a href="{{ route('admin.bookings.index') }}" class="stat-card">
             <div class="stat-icon icon-rose">
                 <i class="fa-solid fa-bell"></i>
@@ -364,6 +394,12 @@
 
             if (data.formatted_revenue) {
                 document.getElementById('monthly_revenue_display').innerText = data.formatted_revenue;
+            }
+            if (data.formatted_expense) {
+                document.getElementById('monthly_expense_display').innerText = data.formatted_expense;
+            }
+            if (data.formatted_net) {
+                document.getElementById('net_income_display').innerText = data.formatted_net;
             }
         })
         .catch(error => {

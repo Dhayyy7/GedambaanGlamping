@@ -85,6 +85,22 @@
             <td colspan="2" class="kpi-val" style="background-color: #fef3c7; text-align: right; color: #b45309;">Rp {{ number_format($summary['revenue'], 0, ',', '.') }}</td>
             <td colspan="9" style="border:none;"></td>
         </tr>
+        <tr>
+            <td colspan="2" style="background-color: #fee2e2; font-weight: bold;">Total Pengeluaran</td>
+            <td colspan="2" class="kpi-val" style="background-color: #fee2e2; text-align: right; color: #991b1b;">Rp {{ number_format($summary['expense'], 0, ',', '.') }}</td>
+            <td colspan="9" style="border:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="background-color: #e0f2fe; font-weight: bold;">Pendapatan Bersih (Total - Pengeluaran)</td>
+            <td colspan="2" class="kpi-val" style="background-color: #e0f2fe; text-align: right; color: #075985;">
+                @if($summary['net_income'] < 0)
+                    -Rp {{ number_format(abs($summary['net_income']), 0, ',', '.') }}
+                @else
+                    Rp {{ number_format($summary['net_income'], 0, ',', '.') }}
+                @endif
+            </td>
+            <td colspan="9" style="border:none;"></td>
+        </tr>
         <tr><td colspan="13" style="border:none;"></td></tr>
 
         <!-- Table Data Header -->
