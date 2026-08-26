@@ -18,11 +18,16 @@ class DashboardController extends Controller
     {
         // 1. Calculate Real Stat Metrics
         $totalRooms = Room::count();
-        $activeBookings = Booking::whereIn('status', [1, 2, 3, 4])->count();
+        $activeBookings = Booking::whereIn('status', [2, 3, 4])->count();
         $pendingCount = Booking::where('status', 1)->count();
 
         $currentMonth = $request->input('month', date('m'));
         $currentYear = $request->input('year', date('Y'));
+
+        $monthlyActiveBookings = Booking::whereIn('status', [2, 3, 4])
+            ->whereYear('check_in_date', $currentYear)
+            ->whereMonth('check_in_date', (int)$currentMonth)
+            ->count();
 
         $monthlyRevenue = Booking::whereIn('status', [2, 3, 4])
             ->whereYear('check_in_date', $currentYear)
@@ -58,6 +63,7 @@ class DashboardController extends Controller
                 'labels' => $chartLabels,
                 'lunas' => $chartDataLunas,
                 'batal' => $chartDataBatal,
+                'monthly_active_bookings' => $monthlyActiveBookings . ' Pemesanan',
                 'formatted_revenue' => 'Rp ' . number_format($monthlyRevenue, 0, ',', '.'),
                 'formatted_expense' => 'Rp ' . number_format($monthlyExpense, 0, ',', '.'),
                 'formatted_net' => ($netIncome >= 0 ? 'Rp ' : '-Rp ') . number_format(abs($netIncome), 0, ',', '.'),
@@ -67,6 +73,7 @@ class DashboardController extends Controller
         $stats = [
             'total_rooms' => $totalRooms,
             'active_bookings' => $activeBookings,
+            'monthly_active_bookings' => $monthlyActiveBookings,
             'monthly_revenue' => $monthlyRevenue,
             'monthly_expense' => $monthlyExpense,
             'net_income' => $netIncome,

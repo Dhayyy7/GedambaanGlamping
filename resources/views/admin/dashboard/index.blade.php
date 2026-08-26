@@ -43,6 +43,7 @@
 
     .icon-indigo { background-color: #e0e7ff; color: #4f46e5; }
     .icon-emerald { background-color: #dcfce7; color: #16a34a; }
+    .icon-teal { background-color: #ccfbf1; color: #0d9488; }
     .icon-amber { background-color: #fef3c7; color: #d97706; }
     .icon-rose { background-color: #ffe4e6; color: #e11d48; }
     .icon-red { background-color: #fee2e2; color: #dc2626; }
@@ -174,6 +175,17 @@
             <div class="stat-details">
                 <h3>Pemesanan Aktif</h3>
                 <div class="value">{{ $stats['active_bookings'] }} Pemesanan</div>
+            </div>
+        </div>
+
+        <!-- Card 3: Pemesanan Aktif Bulan Ini -->
+        <div class="stat-card">
+            <div class="stat-icon icon-teal">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div class="stat-details">
+                <h3>Pemesanan Aktif Bulan Ini</h3>
+                <div class="value" id="monthly_active_bookings_display">{{ $stats['monthly_active_bookings'] }} Pemesanan</div>
             </div>
         </div>
 
@@ -392,6 +404,9 @@
                 bookingChart.update();
             }
 
+            if (data.monthly_active_bookings) {
+                document.getElementById('monthly_active_bookings_display').innerText = data.monthly_active_bookings;
+            }
             if (data.formatted_revenue) {
                 document.getElementById('monthly_revenue_display').innerText = data.formatted_revenue;
             }
