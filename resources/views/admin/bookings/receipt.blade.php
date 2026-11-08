@@ -188,14 +188,81 @@
             background: #4338ca;
         }
 
+        .mode-switcher-bar {
+            max-width: 650px;
+            margin: 0 auto 16px auto;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .mode-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: #4f46e5;
+            color: #ffffff;
+        }
+
+        .mode-btn.inactive {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .mode-btn.inactive:hover {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
         @media print {
             .btn-print-floating { display: none; }
+            .mode-switcher-bar { display: none; }
             body { padding: 0; background: #ffffff; }
             .receipt-card { box-shadow: none; border: none; padding: 0; }
         }
     </style>
 </head>
 <body>
+    @php
+        $siblingBookings = $siblingBookings ?? collect([$booking]);
+        $isCombined = $isCombined ?? false;
+        $bookingsToPrint = $bookingsToPrint ?? collect([$booking]);
+        $grandTotalPrice = $bookingsToPrint->sum('total_price');
+        $allCodes = $bookingsToPrint->pluck('booking_code')->map(fn($c) => '#' . $c)->implode(', ');
+    @endphp
+
+    @if($siblingBookings->count() > 1)
+    <div class="mode-switcher-bar">
+        <div style="font-size: 12px; color: #334155; font-weight: 600;">
+            <i class="fa-solid fa-layer-group" style="color: #4f46e5;"></i>
+            Tamu ini memiliki <strong>{{ $siblingBookings->count() }} kamar</strong> di tanggal yang sama:
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <a href="{{ route('admin.bookings.receipt', [$booking->id, 'mode' => 'single']) }}" class="mode-btn {{ !$isCombined ? 'active' : 'inactive' }}">
+                <i class="fa-solid fa-file-invoice"></i> Nota Satuan (1 Kamar)
+            </a>
+            <a href="{{ route('admin.bookings.receipt', [$booking->id, 'mode' => 'combined']) }}" class="mode-btn {{ $isCombined ? 'active' : 'inactive' }}">
+                <i class="fa-solid fa-copy"></i> Nota Gabungan ({{ $siblingBookings->count() }} Kamar)
+            </a>
+        </div>
+    </div>
+    @endif
 
     <button type="button" class="btn-print-floating" onclick="window.print()">
         <i class="fa-solid fa-print"></i> Cetak / Simpan Nota PDF
@@ -212,8 +279,8 @@
                     </div>
                 </td>
                 <td style="text-align: right;">
-                    <div class="receipt-badge-title">NOTA PEMBAYARAN</div>
-                    <div class="receipt-code-display">#{{ $booking->booking_code }}</div>
+                    <div class="receipt-badge-title">{{ $isCombined ? 'NOTA PEMBAYARAN GABUNGAN' : 'NOTA PEMBAYARAN' }}</div>
+                    <div class="receipt-code-display">{{ $allCodes }}</div>
                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
                         Tgl: {{ date('d F Y') }}
                     </div>
@@ -232,8 +299,14 @@
                 </div>
             </div>
             <div class="meta-box">
-                <h4>Detail Reservasi</h4>
-                <p>{{ $booking->room->name ?? 'Kamar' }} ({{ $booking->room->code ?? '' }})</p>
+                <h4>Detail Reservasi {{ $isCombined ? '(' . $bookingsToPrint->count() . ' Kamar)' : '' }}</h4>
+                @if($isCombined)
+                    <p style="font-size: 12px; line-height: 1.4;">
+                        {{ $bookingsToPrint->map(fn($b) => ($b->room->name ?? 'Kamar') . ' (' . ($b->room->code ?? '') . ')')->implode(', ') }}
+                    </p>
+                @else
+                    <p>{{ $booking->room->name ?? 'Kamar' }} ({{ $booking->room->code ?? '' }})</p>
+                @endif
                 <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
                     <i class="fa-solid fa-calendar-day"></i> Check-in: {{ $booking->check_in_date->format('d M Y') }}<br>
                     <i class="fa-solid fa-calendar-check"></i> Check-out: {{ $booking->check_out_date->format('d M Y') }} ({{ $booking->total_nights }} Malam)
@@ -252,68 +325,70 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $details = $booking->room ? $booking->room->calculateBookingDetails($booking->check_in_date, $booking->check_out_date) : null;
-                    $weekdayNights = $details['weekday_nights'] ?? $booking->total_nights;
-                    $weekendNights = $details['weekend_nights'] ?? 0;
+                @foreach($bookingsToPrint as $itemBooking)
+                    @php
+                        $details = $itemBooking->room ? $itemBooking->room->calculateBookingDetails($itemBooking->check_in_date, $itemBooking->check_out_date) : null;
+                        $weekdayNights = $details['weekday_nights'] ?? $itemBooking->total_nights;
+                        $weekendNights = $details['weekend_nights'] ?? 0;
 
-                    $effectiveDiscount = ($booking->admin_discount && $booking->admin_discount > 0) ? $booking->admin_discount : ($booking->discount ?? 0);
-                    $multiplier = 1 - ($effectiveDiscount / 100);
+                        $effectiveDiscount = ($itemBooking->admin_discount && $itemBooking->admin_discount > 0) ? $itemBooking->admin_discount : ($itemBooking->discount ?? 0);
+                        $multiplier = 1 - ($effectiveDiscount / 100);
 
-                    $baseWeekday = $booking->room ? $booking->room->price : $booking->room_price;
-                    $baseWeekend = ($booking->room && $booking->room->weekend_price > 0) ? $booking->room->weekend_price : $baseWeekday;
+                        $baseWeekday = $itemBooking->room ? $itemBooking->room->price : $itemBooking->room_price;
+                        $baseWeekend = ($itemBooking->room && $itemBooking->room->weekend_price > 0) ? $itemBooking->room->weekend_price : $baseWeekday;
 
-                    $netWeekdayUnit = $baseWeekday * $multiplier;
-                    $netWeekendUnit = $baseWeekend * $multiplier;
+                        $netWeekdayUnit = $baseWeekday * $multiplier;
+                        $netWeekendUnit = $baseWeekend * $multiplier;
 
-                    $weekdaySubtotal = $netWeekdayUnit * $weekdayNights;
-                    $weekendSubtotal = $netWeekendUnit * $weekendNights;
-                @endphp
+                        $weekdaySubtotal = $netWeekdayUnit * $weekdayNights;
+                        $weekendSubtotal = $netWeekendUnit * $weekendNights;
+                    @endphp
 
-                @if($weekdayNights > 0)
-                <tr>
-                    <td>
-                        <strong>Sewa {{ $booking->room->name ?? 'Kamar' }} (Hari Biasa / Weekday)</strong>
-                        @if($booking->admin_discount && $booking->admin_discount > 0)
-                            <div style="font-size: 10px; color: #ea580c; font-weight: bold;">Diskon Khusus Admin {{ number_format($booking->admin_discount, 0) }}% OFF</div>
-                        @elseif($booking->discount && $booking->discount > 0)
-                            <div style="font-size: 10px; color: #dc2626;">Diskon {{ number_format($booking->discount, 0) }}% OFF</div>
-                        @endif
-                    </td>
-                    <td style="text-align: center;">{{ $weekdayNights }} Malam</td>
-                    <td style="text-align: right;">Rp {{ number_format($netWeekdayUnit, 0, ',', '.') }}</td>
-                    <td style="text-align: right; font-weight: bold;">Rp {{ number_format($weekdaySubtotal, 0, ',', '.') }}</td>
-                </tr>
-                @endif
+                    @if($weekdayNights > 0)
+                    <tr>
+                        <td>
+                            <strong>Sewa {{ $itemBooking->room->name ?? 'Kamar' }} ({{ $itemBooking->room->code ?? $itemBooking->booking_code }}) - Weekday</strong>
+                            @if($itemBooking->admin_discount && $itemBooking->admin_discount > 0)
+                                <div style="font-size: 10px; color: #ea580c; font-weight: bold;">Diskon Khusus Admin {{ number_format($itemBooking->admin_discount, 0) }}% OFF</div>
+                            @elseif($itemBooking->discount && $itemBooking->discount > 0)
+                                <div style="font-size: 10px; color: #dc2626;">Diskon {{ number_format($itemBooking->discount, 0) }}% OFF</div>
+                            @endif
+                        </td>
+                        <td style="text-align: center;">{{ $weekdayNights }} Malam</td>
+                        <td style="text-align: right;">Rp {{ number_format($netWeekdayUnit, 0, ',', '.') }}</td>
+                        <td style="text-align: right; font-weight: bold;">Rp {{ number_format($weekdaySubtotal, 0, ',', '.') }}</td>
+                    </tr>
+                    @endif
 
-                @if($weekendNights > 0)
-                <tr>
-                    <td>
-                        <strong>Sewa {{ $booking->room->name ?? 'Kamar' }} (Akhir Pekan / Weekend)</strong>
-                        @if($booking->admin_discount && $booking->admin_discount > 0)
-                            <div style="font-size: 10px; color: #ea580c; font-weight: bold;">Diskon Khusus Admin {{ number_format($booking->admin_discount, 0) }}% OFF</div>
-                        @elseif($booking->discount && $booking->discount > 0)
-                            <div style="font-size: 10px; color: #dc2626;">Diskon {{ number_format($booking->discount, 0) }}% OFF</div>
-                        @endif
-                    </td>
-                    <td style="text-align: center;">{{ $weekendNights }} Malam</td>
-                    <td style="text-align: right;">Rp {{ number_format($netWeekendUnit, 0, ',', '.') }}</td>
-                    <td style="text-align: right; font-weight: bold;">Rp {{ number_format($weekendSubtotal, 0, ',', '.') }}</td>
-                </tr>
-                @endif
+                    @if($weekendNights > 0)
+                    <tr>
+                        <td>
+                            <strong>Sewa {{ $itemBooking->room->name ?? 'Kamar' }} ({{ $itemBooking->room->code ?? $itemBooking->booking_code }}) - Weekend</strong>
+                            @if($itemBooking->admin_discount && $itemBooking->admin_discount > 0)
+                                <div style="font-size: 10px; color: #ea580c; font-weight: bold;">Diskon Khusus Admin {{ number_format($itemBooking->admin_discount, 0) }}% OFF</div>
+                            @elseif($itemBooking->discount && $itemBooking->discount > 0)
+                                <div style="font-size: 10px; color: #dc2626;">Diskon {{ number_format($itemBooking->discount, 0) }}% OFF</div>
+                            @endif
+                        </td>
+                        <td style="text-align: center;">{{ $weekendNights }} Malam</td>
+                        <td style="text-align: right;">Rp {{ number_format($netWeekendUnit, 0, ',', '.') }}</td>
+                        <td style="text-align: right; font-weight: bold;">Rp {{ number_format($weekendSubtotal, 0, ',', '.') }}</td>
+                    </tr>
+                    @endif
 
-                @if(is_array($booking->extra_facilities) && count($booking->extra_facilities) > 0)
-                    @foreach($booking->extra_facilities as $ef)
-                        <tr>
-                            <td>
-                                <strong>Extra: {{ $ef['name'] ?? 'Fasilitas Tambahan' }}</strong>
-                            </td>
-                            <td style="text-align: center;">1 Item</td>
-                            <td style="text-align: right;">Rp {{ number_format($ef['price'] ?? 0, 0, ',', '.') }}</td>
-                            <td style="text-align: right; font-weight: bold;">Rp {{ number_format($ef['price'] ?? 0, 0, ',', '.') }}</td>
-                        </tr>
-                    @endforeach
-                @endif
+                    @if(is_array($itemBooking->extra_facilities) && count($itemBooking->extra_facilities) > 0)
+                        @foreach($itemBooking->extra_facilities as $ef)
+                            <tr>
+                                <td>
+                                    <strong>Extra ({{ $itemBooking->room->code ?? $itemBooking->booking_code }}): {{ $ef['name'] ?? 'Fasilitas Tambahan' }}</strong>
+                                </td>
+                                <td style="text-align: center;">1 Item</td>
+                                <td style="text-align: right;">Rp {{ number_format($ef['price'] ?? 0, 0, ',', '.') }}</td>
+                                <td style="text-align: right; font-weight: bold;">Rp {{ number_format($ef['price'] ?? 0, 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
+                @endforeach
             </tbody>
         </table>
 
@@ -332,8 +407,8 @@
                 </div>
             </div>
             <div style="text-align: right;">
-                <div class="grand-total-label">Total Pembayaran</div>
-                <div class="grand-total-val">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</div>
+                <div class="grand-total-label">Total Pembayaran {{ $isCombined ? '(' . $bookingsToPrint->count() . ' Kamar)' : '' }}</div>
+                <div class="grand-total-val">Rp {{ number_format($grandTotalPrice, 0, ',', '.') }}</div>
             </div>
         </div>
 

@@ -1,10 +1,59 @@
 <script>
     function openCreateBookingModal() {
+        updateSelectedRoomsUI();
         document.getElementById('createBookingModal').classList.add('show');
     }
 
     function closeCreateBookingModal() {
         document.getElementById('createBookingModal').classList.remove('show');
+    }
+
+    function updateSelectedRoomsUI() {
+        const checkboxes = document.querySelectorAll('.create-room-checkbox');
+        let count = 0;
+        checkboxes.forEach(cb => {
+            const card = cb.closest('.room-checkbox-card');
+            if (cb.checked) {
+                count++;
+                if (card) {
+                    card.style.borderColor = '#4f46e5';
+                    card.style.backgroundColor = '#eef2ff';
+                }
+            } else if (card) {
+                card.style.borderColor = '#e2e8f0';
+                card.style.backgroundColor = '#ffffff';
+            }
+        });
+
+        const badge = document.getElementById('selected_rooms_badge');
+        if (badge) {
+            badge.innerText = `${count} Kamar Dipilih`;
+            badge.style.backgroundColor = count > 0 ? '#dcfce7' : '#e0e7ff';
+            badge.style.color = count > 0 ? '#166534' : '#4338ca';
+        }
+
+        const errEl = document.getElementById('room_selection_error');
+        if (errEl && count > 0) {
+            errEl.style.display = 'none';
+        }
+    }
+
+    function toggleAllRooms(checked) {
+        document.querySelectorAll('.create-room-checkbox').forEach(cb => {
+            cb.checked = checked;
+        });
+        updateSelectedRoomsUI();
+    }
+
+    function validateCreateBookingForm() {
+        const checkedCount = document.querySelectorAll('.create-room-checkbox:checked').length;
+        const errEl = document.getElementById('room_selection_error');
+        if (checkedCount === 0) {
+            if (errEl) errEl.style.display = 'block';
+            return false;
+        }
+        if (errEl) errEl.style.display = 'none';
+        return true;
     }
 
     function openEditModal(booking, room) {
@@ -127,6 +176,8 @@
     }
 
     $(document).ready(function() {
+        updateSelectedRoomsUI();
+
         if ($('#status_filter').length) {
             $('#status_filter').select2({
                 placeholder: '-- Semua Status --',

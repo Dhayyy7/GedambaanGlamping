@@ -9,6 +9,7 @@ use App\Models\RoomMaintenance;
 use App\Models\ExtraFacility;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -79,14 +80,19 @@ class BookingController extends Controller
     }
 
     /**
-     * Store a newly created booking in storage.
+     * Store newly created booking(s) in storage (supports single or multiple rooms at once).
      */
     public function store(Request $request)
     {
         $this->autoUpdateBookingStatuses();
 
+        if ($request->filled('room_id') && !$request->has('room_ids')) {
+            $request->merge(['room_ids' => [$request->input('room_id')]]);
+        }
+
         $request->validate([
-            'room_id' => ['required', 'exists:rooms,id'],
+            'room_ids' => ['required', 'array', 'min:1'],
+            'room_ids.*' => ['required', 'exists:rooms,id'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_address' => ['required', 'string'],
             'customer_phone' => ['required', 'string', 'max:50'],
@@ -98,7 +104,8 @@ class BookingController extends Controller
             'extra_facility_ids' => ['nullable', 'array'],
             'extra_facility_ids.*' => ['exists:extra_facilities,id'],
         ], [
-            'room_id.required' => 'Pilih kamar terlebih dahulu.',
+            'room_ids.required' => 'Pilih minimal satu kamar terlebih dahulu.',
+            'room_ids.min' => 'Pilih minimal satu kamar terlebih dahulu.',
             'customer_name.required' => 'Nama pemesan wajib diisi.',
             'customer_address.required' => 'Alamat pemesan wajib diisi.',
             'customer_phone.required' => 'Nomor HP pemesan wajib diisi.',
@@ -110,70 +117,62 @@ class BookingController extends Controller
             'admin_discount.max' => 'Diskon Admin maksimal 100%.',
         ]);
 
-        $roomId = $request->input('room_id');
+        $roomIds = array_values(array_unique($request->input('room_ids', [])));
         $checkInStr = $request->input('check_in_date');
         $checkOutStr = $request->input('check_out_date');
 
-        // Check availability for overlaps with active bookings (status 1, 2, 3, or 4)
-        $isConflict = Booking::where('room_id', $roomId)
-            ->whereIn('status', [1, 2, 3, 4])
-            ->where(function ($q) {
-                $q->whereNull('expired_at')->orWhere('expired_at', '>', now());
-            })
-            ->where(function ($q) use ($checkInStr, $checkOutStr) {
-                $q->where('check_in_date', '<', $checkOutStr)
-                  ->where('check_out_date', '>', $checkInStr);
-            })
-            ->exists();
+        $selectedRooms = Room::whereIn('id', $roomIds)->get()->keyBy('id');
+        $conflictRooms = [];
+        $maintenanceRooms = [];
 
-        if ($isConflict) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Kamar sudah terbooking pada tanggal tersebut.');
+        foreach ($roomIds as $roomId) {
+            $roomObj = $selectedRooms->get($roomId);
+            $roomLabel = $roomObj ? ($roomObj->code . ' - ' . $roomObj->name) : ('ID ' . $roomId);
+
+            // Check availability for overlaps with active bookings (status 1, 2, 3, or 4)
+            $isConflict = Booking::where('room_id', $roomId)
+                ->whereIn('status', [1, 2, 3, 4])
+                ->where(function ($q) {
+                    $q->whereNull('expired_at')->orWhere('expired_at', '>', now());
+                })
+                ->where(function ($q) use ($checkInStr, $checkOutStr) {
+                    $q->where('check_in_date', '<', $checkOutStr)
+                      ->where('check_out_date', '>', $checkInStr);
+                })
+                ->exists();
+
+            if ($isConflict) {
+                $conflictRooms[] = $roomLabel;
+            }
+
+            // Check maintenance conflict
+            $isMaintenanceConflict = RoomMaintenance::where('room_id', $roomId)
+                ->where(function ($q) use ($checkInStr, $checkOutStr) {
+                    $q->where('start_date', '<', $checkOutStr)
+                      ->where('end_date', '>=', $checkInStr);
+                })
+                ->exists();
+
+            if ($isMaintenanceConflict) {
+                $maintenanceRooms[] = $roomLabel;
+            }
         }
 
-        // Check maintenance conflict
-        $isMaintenanceConflict = RoomMaintenance::where('room_id', $roomId)
-            ->where(function ($q) use ($checkInStr, $checkOutStr) {
-                $q->where('start_date', '<', $checkOutStr)
-                  ->where('end_date', '>=', $checkInStr);
-            })
-            ->exists();
-
-        if ($isMaintenanceConflict) {
+        if (!empty($conflictRooms)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal tersebut.');
+                ->with('error', 'Kamar sudah terbooking pada tanggal tersebut: ' . implode(', ', $conflictRooms));
         }
 
-        $room = Room::findOrFail($roomId);
+        if (!empty($maintenanceRooms)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Kamar sedang dalam masa pemeliharaan (maintenance) pada tanggal tersebut: ' . implode(', ', $maintenanceRooms));
+        }
+
         $checkIn = Carbon::parse($checkInStr);
         $checkOut = Carbon::parse($checkOutStr);
-
         $adminDiscount = max(0, min(100, (float) $request->input('admin_discount', 0)));
-
-        // Calculate dynamic room total price based on Weekday vs Weekend/Holiday nights
-        $bookingDetails = $room->calculateBookingDetails($checkInStr, $checkOutStr);
-        $totalNights = $bookingDetails['total_nights'];
-        
-        $roomOriginalPrice = $bookingDetails['total_original_price'];
-        if ($adminDiscount > 0) {
-            $roomTotalPrice = $roomOriginalPrice - ($roomOriginalPrice * ($adminDiscount / 100));
-        } else {
-            $roomTotalPrice = $bookingDetails['total_final_price'];
-        }
-
-        // Code format: Kode Kamar + Tanggal Check-in YYYYMMDD (e.g. P1V120260729)
-        $baseCode = strtoupper($room->code) . $checkIn->format('Ymd');
-        $bookingCode = $baseCode;
-        $counter = 1;
-        while (Booking::withTrashed()->where('booking_code', $bookingCode)->exists()) {
-            $bookingCode = $baseCode . '-' . $counter;
-            $counter++;
-        }
-
-        $roomPrice = $room->price;
-        $discount = $room->discount; // percent % from room if available, else null
 
         // Process selected Extra Facilities
         $selectedExtraIds = $request->input('extra_facility_ids', []);
@@ -190,31 +189,83 @@ class BookingController extends Controller
             ];
         }
 
-        $totalPrice = $roomTotalPrice + $totalExtraPrice;
-
         $status = $request->input('status', 1); // default 1 = Pending
         $expiredAt = ($status == 1) ? Carbon::now()->addHours(2) : null;
 
-        Booking::create([
-            'room_id' => $room->id,
-            'booking_code' => $bookingCode,
-            'customer_name' => $request->input('customer_name'),
-            'customer_address' => $request->input('customer_address'),
-            'customer_phone' => $request->input('customer_phone'),
-            'customer_sosmed' => $request->input('customer_sosmed'),
-            'check_in_date' => $checkIn->format('Y-m-d'),
-            'check_out_date' => $checkOut->format('Y-m-d'),
-            'total_nights' => $totalNights,
-            'room_price' => $roomPrice,
-            'discount' => $discount,
-            'admin_discount' => $adminDiscount,
-            'total_price' => $totalPrice,
-            'status' => $status,
-            'expired_at' => $expiredAt,
-            'extra_facilities' => $savedExtraFacilities,
-        ]);
+        $createdCodes = [];
 
-        return redirect()->route('admin.bookings.index')->with('success', 'Pemesanan baru berhasil disimpan dengan Kode: ' . $bookingCode);
+        DB::transaction(function () use (
+            $roomIds,
+            $selectedRooms,
+            $checkInStr,
+            $checkOutStr,
+            $checkIn,
+            $checkOut,
+            $adminDiscount,
+            $totalExtraPrice,
+            $savedExtraFacilities,
+            $status,
+            $expiredAt,
+            $request,
+            &$createdCodes
+        ) {
+            foreach ($roomIds as $roomId) {
+                $room = $selectedRooms->get($roomId) ?? Room::findOrFail($roomId);
+
+                // Calculate dynamic room total price based on Weekday vs Weekend/Holiday nights
+                $bookingDetails = $room->calculateBookingDetails($checkInStr, $checkOutStr);
+                $totalNights = $bookingDetails['total_nights'];
+
+                $roomOriginalPrice = $bookingDetails['total_original_price'];
+                if ($adminDiscount > 0) {
+                    $roomTotalPrice = $roomOriginalPrice - ($roomOriginalPrice * ($adminDiscount / 100));
+                } else {
+                    $roomTotalPrice = $bookingDetails['total_final_price'];
+                }
+
+                // Code format: Kode Kamar + Tanggal Check-in YYYYMMDD (e.g. P1V120260729)
+                $baseCode = strtoupper($room->code) . $checkIn->format('Ymd');
+                $bookingCode = $baseCode;
+                $counter = 1;
+                while (Booking::withTrashed()->where('booking_code', $bookingCode)->exists()) {
+                    $bookingCode = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+
+                $roomPrice = $room->price;
+                $discount = $room->discount; // percent % from room if available, else null
+                $totalPrice = $roomTotalPrice + $totalExtraPrice;
+
+                Booking::create([
+                    'room_id' => $room->id,
+                    'booking_code' => $bookingCode,
+                    'customer_name' => $request->input('customer_name'),
+                    'customer_address' => $request->input('customer_address'),
+                    'customer_phone' => $request->input('customer_phone'),
+                    'customer_sosmed' => $request->input('customer_sosmed'),
+                    'check_in_date' => $checkIn->format('Y-m-d'),
+                    'check_out_date' => $checkOut->format('Y-m-d'),
+                    'total_nights' => $totalNights,
+                    'room_price' => $roomPrice,
+                    'discount' => $discount,
+                    'admin_discount' => $adminDiscount,
+                    'total_price' => $totalPrice,
+                    'status' => $status,
+                    'expired_at' => $expiredAt,
+                    'extra_facilities' => $savedExtraFacilities,
+                ]);
+
+                $createdCodes[] = $bookingCode;
+            }
+        });
+
+        $count = count($createdCodes);
+        $codesText = implode(', ', $createdCodes);
+        $msg = $count > 1
+            ? "{$count} pemesanan kamar berhasil disimpan sekaligus dengan Kode: {$codesText}"
+            : "Pemesanan baru berhasil disimpan dengan Kode: {$codesText}";
+
+        return redirect()->route('admin.bookings.index')->with('success', $msg);
     }
 
     /**
@@ -394,10 +445,31 @@ class BookingController extends Controller
 
     /**
      * Display printable receipt / nota for a booking (Lunas / DP / Selesai).
+     * Supports single room receipt or combined receipt (Nota Gabungan) for multi-room bookings.
      */
-    public function receipt(Booking $booking)
+    public function receipt(Request $request, Booking $booking)
     {
+        $booking->load('room');
         $setting = \App\Models\Setting::getSetting();
-        return view('admin.bookings.receipt', compact('booking', 'setting'));
+
+        $siblingBookings = Booking::with('room')
+            ->whereIn('status', [2, 3, 4])
+            ->whereDate('check_in_date', $booking->check_in_date->format('Y-m-d'))
+            ->whereDate('check_out_date', $booking->check_out_date->format('Y-m-d'))
+            ->where(function ($q) use ($booking) {
+                $q->where('customer_phone', $booking->customer_phone)
+                  ->orWhereRaw('LOWER(TRIM(customer_name)) = ?', [strtolower(trim($booking->customer_name))]);
+            })
+            ->orderBy('id', 'asc')
+            ->get();
+
+        if (!$siblingBookings->contains('id', $booking->id)) {
+            $siblingBookings->prepend($booking);
+        }
+
+        $isCombined = $request->query('mode') === 'combined' && $siblingBookings->count() > 1;
+        $bookingsToPrint = $isCombined ? $siblingBookings : collect([$booking]);
+
+        return view('admin.bookings.receipt', compact('booking', 'setting', 'siblingBookings', 'bookingsToPrint', 'isCombined'));
     }
 }
