@@ -5,39 +5,55 @@
 
 @section('styles')
 <style>
-    /* Stats Grid */
+    /* Stats Grid - Neat 4x2 Layout */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.25rem;
         margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1280px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .stat-card {
         background-color: #ffffff;
         border-radius: 16px;
-        padding: 1.5rem;
+        padding: 1.25rem 1.35rem;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
         display: flex;
         align-items: center;
-        gap: 1.25rem;
-        transition: transform 0.2s ease;
+        gap: 1rem;
+        min-height: 104px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         text-decoration: none;
     }
 
     .stat-card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
     }
 
     .stat-icon {
-        width: 54px;
-        height: 54px;
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        flex-shrink: 0;
         border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.4rem;
+        font-size: 1.35rem;
         position: relative;
     }
 
@@ -48,6 +64,7 @@
     .icon-rose { background-color: #ffe4e6; color: #e11d48; }
     .icon-red { background-color: #fee2e2; color: #dc2626; }
     .icon-cyan { background-color: #e0f2fe; color: #0284c7; }
+    .icon-purple { background-color: #f3e8ff; color: #7e22ce; }
 
     /* Red Dot Pulsing Notification Badge */
     .notification-badge-dot {
@@ -68,19 +85,37 @@
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
+    .stat-details {
+        min-width: 0;
+        flex: 1;
+    }
+
     .stat-details h3 {
-        font-size: 0.8rem;
-        font-weight: 600;
+        font-size: 0.74rem;
+        font-weight: 700;
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.3rem;
+        line-height: 1.3;
     }
 
     .stat-details .value {
-        font-size: 1.4rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #0f172a;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .stat-subtext {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-top: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
     }
 
     /* Section Cards */
@@ -154,9 +189,9 @@
 
 @section('content')
 
-    <!-- KPI Stat Cards -->
+    <!-- KPI Stat Cards (4x2 Grid) -->
     <div class="stats-grid">
-        <!-- Card 1: Total Kamar -->
+        <!-- Row 1, Col 1: Total Kamar -->
         <div class="stat-card">
             <div class="stat-icon icon-indigo">
                 <i class="fa-solid fa-bed"></i>
@@ -167,7 +202,7 @@
             </div>
         </div>
 
-        <!-- Card 2: Pemesanan Aktif -->
+        <!-- Row 1, Col 2: Pemesanan Aktif -->
         <div class="stat-card">
             <div class="stat-icon icon-emerald">
                 <i class="fa-solid fa-calendar-check"></i>
@@ -178,7 +213,7 @@
             </div>
         </div>
 
-        <!-- Card 3: Pemesanan Aktif Bulan Ini -->
+        <!-- Row 1, Col 3: Pemesanan Aktif Bulan Ini -->
         <div class="stat-card">
             <div class="stat-icon icon-teal">
                 <i class="fa-solid fa-calendar-days"></i>
@@ -189,18 +224,59 @@
             </div>
         </div>
 
-        <!-- Card 3: Pendapatan Bulan Ini -->
+        <!-- Row 1, Col 4: Booking Pending Notification -->
+        <a href="{{ route('admin.bookings.index') }}" class="stat-card">
+            <div class="stat-icon icon-rose">
+                <i class="fa-solid fa-bell"></i>
+                @if($stats['pending_count'] > 0)
+                    <span class="notification-badge-dot"></span>
+                @endif
+            </div>
+            <div class="stat-details">
+                <h3>Booking Pending</h3>
+                @if($stats['pending_count'] > 0)
+                    <div class="value" style="color: #dc2626;">{{ $stats['pending_count'] }} Pemesanan</div>
+                    <div class="stat-subtext" style="color: #dc2626; font-weight: 700;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Kunci 2 Jam - Perlu Cek
+                    </div>
+                @else
+                    <div class="value" style="color: #16a34a;">0 Pending</div>
+                    <div class="stat-subtext" style="color: #16a34a;">
+                        <i class="fa-solid fa-circle-check"></i> Tidak Ada Antrean
+                    </div>
+                @endif
+            </div>
+        </a>
+
+        <!-- Row 2, Col 1: Pendapatan Riil Bulan Ini (Di Samping Kiri Estimasi Pendapatan) -->
+        <div class="stat-card">
+            <div class="stat-icon icon-emerald">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div class="stat-details">
+                <h3>Pendapatan Riil Bulan Ini</h3>
+                <div class="value" id="monthly_real_revenue_display" style="color: #16a34a;">Rp {{ number_format($stats['monthly_real_revenue'], 0, ',', '.') }}</div>
+                <div class="stat-subtext">
+                    <i class="fa-solid fa-building-columns" style="color: #16a34a;"></i> Uang Masuk (Lunas + DP 50%)
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2, Col 2: Estimasi Pendapatan Bulan Ini -->
         <div class="stat-card">
             <div class="stat-icon icon-amber">
                 <i class="fa-solid fa-chart-line"></i>
             </div>
             <div class="stat-details">
-                <h3>Pendapatan Bulan Ini</h3>
+                <h3>Estimasi Pendapatan Bulan Ini</h3>
                 <div class="value" id="monthly_revenue_display">Rp {{ number_format($stats['monthly_revenue'], 0, ',', '.') }}</div>
+                <div class="stat-subtext">
+                    <i class="fa-solid fa-coins" style="color: #d97706;"></i> Total Penuh (Jika DP Lunas)
+                </div>
             </div>
         </div>
 
-        <!-- Card 4: Pengeluaran Bulan Ini -->
+        <!-- Row 2, Col 3: Pengeluaran Bulan Ini -->
         <a href="{{ route('admin.expenses.index') }}" class="stat-card">
             <div class="stat-icon icon-red">
                 <i class="fa-solid fa-receipt"></i>
@@ -208,10 +284,13 @@
             <div class="stat-details">
                 <h3>Pengeluaran Bulan Ini</h3>
                 <div class="value" id="monthly_expense_display">Rp {{ number_format($stats['monthly_expense'], 0, ',', '.') }}</div>
+                <div class="stat-subtext">
+                    <i class="fa-solid fa-arrow-trend-down" style="color: #dc2626;"></i> Total Biaya Operasional
+                </div>
             </div>
         </a>
 
-        <!-- Card 5: Total (Pendapatan - Pengeluaran) -->
+        <!-- Row 2, Col 4: Total (Pendapatan - Pengeluaran) -->
         <div class="stat-card">
             <div class="stat-icon icon-cyan">
                 <i class="fa-solid fa-scale-balanced"></i>
@@ -225,32 +304,11 @@
                         Rp {{ number_format($stats['net_income'], 0, ',', '.') }}
                     @endif
                 </div>
+                <div class="stat-subtext">
+                    <i class="fa-solid fa-calculator" style="color: #0284c7;"></i> Estimasi Bersih Bulan Ini
+                </div>
             </div>
         </div>
-
-        <!-- Card 6: Booking Pending Notification -->
-        <a href="{{ route('admin.bookings.index') }}" class="stat-card">
-            <div class="stat-icon icon-rose">
-                <i class="fa-solid fa-bell"></i>
-                @if($stats['pending_count'] > 0)
-                    <span class="notification-badge-dot"></span>
-                @endif
-            </div>
-            <div class="stat-details">
-                <h3>Booking Pending</h3>
-                @if($stats['pending_count'] > 0)
-                    <div class="value" style="color: #dc2626;">{{ $stats['pending_count'] }} Pemesanan</div>
-                    <div style="font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 0.15rem; display: flex; align-items: center; gap: 0.3rem;">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Kunci 2 Jam - Perlu Cek
-                    </div>
-                @else
-                    <div class="value" style="color: #16a34a;">0 Pending</div>
-                    <div style="font-size: 0.72rem; color: #16a34a; font-weight: 600; margin-top: 0.15rem; display: flex; align-items: center; gap: 0.3rem;">
-                        <i class="fa-solid fa-circle-check"></i> Tidak Ada Antrean
-                    </div>
-                @endif
-            </div>
-        </a>
     </div>
 
     <!-- Section Grafik Pemesanan Homestay (Grouped Bar Chart: Lunas vs Dibatalkan) -->
@@ -406,6 +464,9 @@
 
             if (data.monthly_active_bookings) {
                 document.getElementById('monthly_active_bookings_display').innerText = data.monthly_active_bookings;
+            }
+            if (data.formatted_real_revenue) {
+                document.getElementById('monthly_real_revenue_display').innerText = data.formatted_real_revenue;
             }
             if (data.formatted_revenue) {
                 document.getElementById('monthly_revenue_display').innerText = data.formatted_revenue;

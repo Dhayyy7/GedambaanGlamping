@@ -29,10 +29,21 @@ class DashboardController extends Controller
             ->whereMonth('check_in_date', (int)$currentMonth)
             ->count();
 
-        $monthlyRevenue = Booking::whereIn('status', [2, 3, 4])
+        $monthlyLunasRevenue = Booking::whereIn('status', [2, 3])
             ->whereYear('check_in_date', $currentYear)
             ->whereMonth('check_in_date', (int)$currentMonth)
             ->sum('total_price');
+
+        $monthlyDpTotal = Booking::where('status', 4)
+            ->whereYear('check_in_date', $currentYear)
+            ->whereMonth('check_in_date', (int)$currentMonth)
+            ->sum('total_price');
+
+        // Pendapatan Riil: Lunas/Selesai (100%) + DP 50% (dihitung 50% yang sudah masuk rekening)
+        $monthlyRealRevenue = $monthlyLunasRevenue + ($monthlyDpTotal * 0.5);
+
+        // Estimasi Pendapatan: Lunas/Selesai (100%) + DP 50% (dihitung 100% jika lunas nanti)
+        $monthlyRevenue = $monthlyLunasRevenue + $monthlyDpTotal;
 
         $monthlyExpense = Expense::whereYear('tanggal', $currentYear)
             ->whereMonth('tanggal', (int)$currentMonth)
@@ -64,6 +75,7 @@ class DashboardController extends Controller
                 'lunas' => $chartDataLunas,
                 'batal' => $chartDataBatal,
                 'monthly_active_bookings' => $monthlyActiveBookings . ' Pemesanan',
+                'formatted_real_revenue' => 'Rp ' . number_format($monthlyRealRevenue, 0, ',', '.'),
                 'formatted_revenue' => 'Rp ' . number_format($monthlyRevenue, 0, ',', '.'),
                 'formatted_expense' => 'Rp ' . number_format($monthlyExpense, 0, ',', '.'),
                 'formatted_net' => ($netIncome >= 0 ? 'Rp ' : '-Rp ') . number_format(abs($netIncome), 0, ',', '.'),
@@ -74,6 +86,7 @@ class DashboardController extends Controller
             'total_rooms' => $totalRooms,
             'active_bookings' => $activeBookings,
             'monthly_active_bookings' => $monthlyActiveBookings,
+            'monthly_real_revenue' => $monthlyRealRevenue,
             'monthly_revenue' => $monthlyRevenue,
             'monthly_expense' => $monthlyExpense,
             'net_income' => $netIncome,
