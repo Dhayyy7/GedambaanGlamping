@@ -81,7 +81,12 @@
             <td colspan="9" style="border:none;"></td>
         </tr>
         <tr>
-            <td colspan="2" style="background-color: #fef3c7; font-weight: bold;">Total Pendapatan / Omset</td>
+            <td colspan="2" style="background-color: #dcfce7; font-weight: bold;">Pendapatan Riil (Lunas + DP 50%)</td>
+            <td colspan="2" class="kpi-val" style="background-color: #dcfce7; text-align: right; color: #166534;">Rp {{ number_format($summary['real_revenue'] ?? $summary['revenue'], 0, ',', '.') }}</td>
+            <td colspan="9" style="border:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="background-color: #fef3c7; font-weight: bold;">Estimasi Pendapatan / Omset</td>
             <td colspan="2" class="kpi-val" style="background-color: #fef3c7; text-align: right; color: #b45309;">Rp {{ number_format($summary['revenue'], 0, ',', '.') }}</td>
             <td colspan="9" style="border:none;"></td>
         </tr>

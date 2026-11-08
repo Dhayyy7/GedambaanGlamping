@@ -127,7 +127,10 @@ class DashboardController extends Controller
             ->whereMonth('tanggal', $month)
             ->sum('harga');
 
-        $revenue = $bookings->whereIn('status', [2, 3, 4])->sum('total_price');
+        $lunasRevenue = $bookings->whereIn('status', [2, 3])->sum('total_price');
+        $dpTotal = $bookings->where('status', 4)->sum('total_price');
+        $realRevenue = $lunasRevenue + ($dpTotal * 0.5);
+        $revenue = $lunasRevenue + $dpTotal;
 
         $summary = [
             'total' => $bookings->count(),
@@ -135,6 +138,7 @@ class DashboardController extends Controller
             'dp' => $bookings->where('status', 4)->count(),
             'pending' => $bookings->where('status', 1)->count(),
             'batal' => $bookings->where('status', 0)->count(),
+            'real_revenue' => $realRevenue,
             'revenue' => $revenue,
             'expense' => $expenses,
             'net_income' => $revenue - $expenses,
@@ -171,7 +175,10 @@ class DashboardController extends Controller
             ->whereMonth('tanggal', $month)
             ->sum('harga');
 
-        $revenue = $bookings->whereIn('status', [2, 3, 4])->sum('total_price');
+        $lunasRevenue = $bookings->whereIn('status', [2, 3])->sum('total_price');
+        $dpTotal = $bookings->where('status', 4)->sum('total_price');
+        $realRevenue = $lunasRevenue + ($dpTotal * 0.5);
+        $revenue = $lunasRevenue + $dpTotal;
 
         $summary = [
             'total' => $bookings->count(),
@@ -179,6 +186,7 @@ class DashboardController extends Controller
             'dp' => $bookings->where('status', 4)->count(),
             'pending' => $bookings->where('status', 1)->count(),
             'batal' => $bookings->where('status', 0)->count(),
+            'real_revenue' => $realRevenue,
             'revenue' => $revenue,
             'expense' => $expenses,
             'net_income' => $revenue - $expenses,

@@ -55,8 +55,8 @@
 
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 6px;
             margin-bottom: 20px;
         }
 
@@ -202,8 +202,12 @@
             <div class="label">Dibatalkan</div>
             <div class="val" style="color: #dc2626;">{{ $summary['batal'] }}</div>
         </div>
+        <div class="kpi-card" style="background: #dcfce7;">
+            <div class="label">Pendapatan Riil</div>
+            <div class="val" style="color: #166534; font-size: 11px;">Rp {{ number_format($summary['real_revenue'] ?? $summary['revenue'], 0, ',', '.') }}</div>
+        </div>
         <div class="kpi-card" style="background: #fef3c7;">
-            <div class="label">Total Pendapatan</div>
+            <div class="label">Estimasi Pendapatan</div>
             <div class="val" style="color: #b45309; font-size: 11px;">Rp {{ number_format($summary['revenue'], 0, ',', '.') }}</div>
         </div>
         <div class="kpi-card" style="background: #fee2e2;">
