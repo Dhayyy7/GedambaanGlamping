@@ -324,11 +324,11 @@
                 </div>
             </div>
 
-            <!-- Month Filter & Report Download Dropdown -->
-            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <label for="month_filter" style="font-size: 0.85rem; font-weight: 700; color: #334155;">Filter Bulan:</label>
-                    <select id="month_filter" class="form-select-filter" onchange="updateChartData()">
+            <!-- Month & Date Range Filter + Report Download -->
+            <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    <label for="month_filter" style="font-size: 0.82rem; font-weight: 700; color: #334155; white-space: nowrap;">Bulan:</label>
+                    <select id="month_filter" class="form-select-filter" onchange="onMonthFilterChange()">
                         @for($m = 1; $m <= 12; $m++)
                             @php $mStr = sprintf('%02d', $m); @endphp
                             <option value="{{ $mStr }}" {{ $mStr == $currentMonth ? 'selected' : '' }}>
@@ -336,6 +336,18 @@
                             </option>
                         @endfor
                     </select>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.4rem; background: #f8fafc; padding: 0.25rem 0.6rem; border-radius: 10px; border: 1px solid #cbd5e1; flex-wrap: wrap;">
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #475569; white-space: nowrap;">
+                        <i class="fa-regular fa-calendar" style="color: #4f46e5;"></i> Tanggal:
+                    </span>
+                    <input type="date" id="start_date_filter" value="{{ $startDate ?? '' }}" class="form-select-filter" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; border-radius: 8px; background: #ffffff;" onchange="updateChartData()" title="Dari Tanggal">
+                    <span style="font-size: 0.78rem; color: #64748b; font-weight: 600;">s/d</span>
+                    <input type="date" id="end_date_filter" value="{{ $endDate ?? '' }}" class="form-select-filter" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; border-radius: 8px; background: #ffffff;" onchange="updateChartData()" title="Sampai Tanggal">
+                    <button type="button" id="btn_reset_date" onclick="resetDateFilter()" style="display: {{ (!empty($startDate) || !empty($endDate)) ? 'inline-flex' : 'none' }}; align-items: center; gap: 0.25rem; background: #fee2e2; color: #dc2626; border: none; padding: 0.3rem 0.55rem; border-radius: 7px; font-size: 0.75rem; font-weight: 700; cursor: pointer;" title="Reset Filter Tanggal">
+                        <i class="fa-solid fa-xmark"></i> Reset
+                    </button>
                 </div>
 
                 <!-- Report Export Action Buttons -->
@@ -443,11 +455,37 @@
         });
     });
 
+    function onMonthFilterChange() {
+        document.getElementById('start_date_filter').value = '';
+        document.getElementById('end_date_filter').value = '';
+        updateChartData();
+    }
+
+    function resetDateFilter() {
+        document.getElementById('start_date_filter').value = '';
+        document.getElementById('end_date_filter').value = '';
+        updateChartData();
+    }
+
     function updateChartData() {
         const selectedMonth = document.getElementById('month_filter').value;
+        const startDate = document.getElementById('start_date_filter').value;
+        const endDate = document.getElementById('end_date_filter').value;
         const currentYear = '{{ $currentYear }}';
 
-        fetch(`/admin/dashboard?month=${selectedMonth}&year=${currentYear}`, {
+        const resetBtn = document.getElementById('btn_reset_date');
+        if (resetBtn) {
+            resetBtn.style.display = (startDate || endDate) ? 'inline-flex' : 'none';
+        }
+
+        const params = new URLSearchParams({
+            month: selectedMonth,
+            year: currentYear
+        });
+        if (startDate) params.set('start_date', startDate);
+        if (endDate) params.set('end_date', endDate);
+
+        fetch(`/admin/dashboard?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -485,13 +523,22 @@
 
     function exportReport(type) {
         const selectedMonth = document.getElementById('month_filter').value;
+        const startDate = document.getElementById('start_date_filter').value;
+        const endDate = document.getElementById('end_date_filter').value;
         const currentYear = '{{ $currentYear }}';
 
+        const params = new URLSearchParams({
+            month: selectedMonth,
+            year: currentYear
+        });
+        if (startDate) params.set('start_date', startDate);
+        if (endDate) params.set('end_date', endDate);
+
         if (type === 'pdf') {
-            const url = `{{ route('admin.dashboard.report.pdf') }}?month=${selectedMonth}&year=${currentYear}`;
+            const url = `{{ route('admin.dashboard.report.pdf') }}?${params.toString()}`;
             window.open(url, '_blank');
         } else if (type === 'excel') {
-            const url = `{{ route('admin.dashboard.report.excel') }}?month=${selectedMonth}&year=${currentYear}`;
+            const url = `{{ route('admin.dashboard.report.excel') }}?${params.toString()}`;
             window.location.href = url;
         }
     }

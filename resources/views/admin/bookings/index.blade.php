@@ -319,8 +319,16 @@
         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
             <!-- Filter & Search Form -->
             <form action="{{ route('admin.bookings.index') }}" method="GET" id="booking-filter-form" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <!-- Date Range Filter -->
+                <div style="display: flex; align-items: center; gap: 0.35rem; background: #f8fafc; padding: 0 0.55rem; height: 38px; border-radius: 10px; border: 1px solid #cbd5e1;">
+                    <i class="fa-regular fa-calendar" style="color: #4f46e5; font-size: 0.8rem;"></i>
+                    <input type="date" name="start_date" value="{{ $startDate ?? request('start_date') }}" class="form-input" style="border: none; background: transparent; padding: 0.2rem 0.25rem; font-size: 0.8rem; width: 122px; height: 32px; box-shadow: none;" onchange="this.form.submit()" title="Dari Tanggal Check-In">
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">s/d</span>
+                    <input type="date" name="end_date" value="{{ $endDate ?? request('end_date') }}" class="form-input" style="border: none; background: transparent; padding: 0.2rem 0.25rem; font-size: 0.8rem; width: 122px; height: 32px; box-shadow: none;" onchange="this.form.submit()" title="Sampai Tanggal Check-In">
+                </div>
+
                 <!-- Status Filter (Select2) -->
-                <div style="width: 180px;">
+                <div style="width: 170px;">
                     <select name="status" id="status_filter" class="form-select select2-status" style="width: 100%;">
                         <option value="">-- Semua Status --</option>
                         <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Pending (WA)</option>
@@ -334,8 +342,8 @@
                 <!-- Search Input -->
                 <div style="position: relative; display: flex; align-items: center;">
                     <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; color: #94a3b8; font-size: 0.8rem; z-index: 1;"></i>
-                    <input type="text" name="search" class="form-input" placeholder="Cari kode, nama, hp..." value="{{ request('search', request('code')) }}" style="padding-left: 2.1rem; padding-right: 2rem; border-radius: 10px; width: 200px; font-size: 0.825rem; height: 38px;">
-                    @if(request('search') || request('code') || (request()->has('status') && request('status') !== null && request('status') !== ''))
+                    <input type="text" name="search" class="form-input" placeholder="Cari kode, nama, hp..." value="{{ request('search', request('code')) }}" style="padding-left: 2.1rem; padding-right: 2rem; border-radius: 10px; width: 190px; font-size: 0.825rem; height: 38px;">
+                    @if(request('search') || request('code') || request('start_date') || request('end_date') || (request()->has('status') && request('status') !== null && request('status') !== ''))
                         <a href="{{ route('admin.bookings.index') }}" style="position: absolute; right: 0.65rem; color: #94a3b8; text-decoration: none; font-size: 0.8rem; z-index: 1;" title="Reset Filter">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </a>

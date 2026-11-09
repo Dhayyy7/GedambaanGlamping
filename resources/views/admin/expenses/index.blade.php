@@ -211,11 +211,11 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <a href="{{ route('admin.expenses.report.pdf', ['month' => $selectedMonth, 'search' => request('search')]) }}" target="_blank" class="btn-submit" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); text-decoration: none;">
+            <a href="{{ route('admin.expenses.report.pdf', ['month' => $selectedMonth, 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'search' => request('search')]) }}" target="_blank" class="btn-submit" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); text-decoration: none;">
                 <i class="fa-solid fa-print"></i>
                 <span>Cetak PDF</span>
             </a>
-            <a href="{{ route('admin.expenses.report.excel', ['month' => $selectedMonth, 'search' => request('search')]) }}" class="btn-submit" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); text-decoration: none;">
+            <a href="{{ route('admin.expenses.report.excel', ['month' => $selectedMonth, 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'search' => request('search')]) }}" class="btn-submit" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); text-decoration: none;">
                 <i class="fa-solid fa-file-excel"></i>
                 <span>Excel / CSV</span>
             </a>
@@ -226,23 +226,32 @@
         </div>
     </div>
 
-    <!-- Filter Bar (Bulan & Pencarian) -->
-    <form action="{{ route('admin.expenses.index') }}" method="GET" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+    <!-- Filter Bar (Bulan, Rentang Tanggal & Pencarian) -->
+    <form action="{{ route('admin.expenses.index') }}" method="GET" id="expenseFilterForm" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; flex: 1;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <label style="font-size: 0.85rem; font-weight: 600; color: #475569; white-space: nowrap;">Filter Bulan:</label>
-                <input type="month" name="month" value="{{ $selectedMonth }}" class="form-input" style="padding: 0.45rem 0.75rem; width: auto;" onchange="this.form.submit()">
+            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <label style="font-size: 0.82rem; font-weight: 700; color: #475569; white-space: nowrap;">Filter Bulan:</label>
+                <input type="month" name="month" id="expense_month" value="{{ $selectedMonth }}" class="form-input" style="padding: 0.42rem 0.7rem; width: auto; font-size: 0.85rem;" onchange="document.getElementById('expense_start_date').value=''; document.getElementById('expense_end_date').value=''; this.form.submit();">
             </div>
 
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 320px;">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama pengeluaran/keterangan..." class="form-input" style="padding: 0.45rem 0.75rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 0.45rem; background: #ffffff; padding: 0.25rem 0.65rem; border-radius: 10px; border: 1px solid #cbd5e1; flex-wrap: wrap;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #475569; white-space: nowrap;">
+                    <i class="fa-regular fa-calendar" style="color: #e11d48;"></i> Tanggal:
+                </label>
+                <input type="date" name="start_date" id="expense_start_date" value="{{ $startDate ?? request('start_date') }}" class="form-input" style="padding: 0.3rem 0.5rem; width: auto; font-size: 0.82rem; border: none;" onchange="this.form.submit()" title="Dari Tanggal">
+                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600;">s/d</span>
+                <input type="date" name="end_date" id="expense_end_date" value="{{ $endDate ?? request('end_date') }}" class="form-input" style="padding: 0.3rem 0.5rem; width: auto; font-size: 0.82rem; border: none;" onchange="this.form.submit()" title="Sampai Tanggal">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 220px; max-width: 300px;">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama pengeluaran/keterangan..." class="form-input" style="padding: 0.45rem 0.75rem; width: 100%; font-size: 0.85rem;">
                 <button type="submit" class="btn-submit" style="padding: 0.45rem 0.85rem; background-color: #475569;">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
             </div>
         </div>
 
-        @if(request('month') || request('search'))
+        @if(request('month') || request('start_date') || request('end_date') || request('search'))
             <a href="{{ route('admin.expenses.index') }}" style="font-size: 0.82rem; color: #ef4444; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
                 <i class="fa-solid fa-rotate-left"></i> Reset Filter
             </a>

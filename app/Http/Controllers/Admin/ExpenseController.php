@@ -25,9 +25,19 @@ class ExpenseController extends Controller
             });
         }
 
-        // Month-Year filter (Format: YYYY-MM)
+        // Date range filter (start_date s/d end_date) or Month-Year filter (Format: YYYY-MM)
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $selectedMonth = $request->input('month', Carbon::now()->format('Y-m'));
-        if (!empty($selectedMonth)) {
+
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            if (!empty($startDate)) {
+                $query->whereDate('tanggal', '>=', $startDate);
+            }
+            if (!empty($endDate)) {
+                $query->whereDate('tanggal', '<=', $endDate);
+            }
+        } elseif (!empty($selectedMonth)) {
             $yearMonth = explode('-', $selectedMonth);
             if (count($yearMonth) === 2) {
                 $query->whereYear('tanggal', $yearMonth[0])
@@ -49,7 +59,9 @@ class ExpenseController extends Controller
             'expenses',
             'totalHarga',
             'totalCount',
-            'selectedMonth'
+            'selectedMonth',
+            'startDate',
+            'endDate'
         ));
     }
 
@@ -136,11 +148,27 @@ class ExpenseController extends Controller
             });
         }
 
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $selectedMonth = $request->input('month', Carbon::now()->format('Y-m'));
         $monthName = 'Semua Periode';
         $year = '';
 
-        if (!empty($selectedMonth)) {
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            if (!empty($startDate)) {
+                $query->whereDate('tanggal', '>=', $startDate);
+            }
+            if (!empty($endDate)) {
+                $query->whereDate('tanggal', '<=', $endDate);
+            }
+            if (!empty($startDate) && !empty($endDate)) {
+                $monthName = Carbon::parse($startDate)->format('d/m/Y') . ' s/d ' . Carbon::parse($endDate)->format('d/m/Y');
+            } elseif (!empty($startDate)) {
+                $monthName = 'Mulai ' . Carbon::parse($startDate)->format('d/m/Y');
+            } else {
+                $monthName = 'Sampai ' . Carbon::parse($endDate)->format('d/m/Y');
+            }
+        } elseif (!empty($selectedMonth)) {
             $yearMonth = explode('-', $selectedMonth);
             if (count($yearMonth) === 2) {
                 $year = $yearMonth[0];
@@ -180,11 +208,27 @@ class ExpenseController extends Controller
             });
         }
 
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $selectedMonth = $request->input('month', Carbon::now()->format('Y-m'));
         $monthName = 'Semua Periode';
         $year = '';
 
-        if (!empty($selectedMonth)) {
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            if (!empty($startDate)) {
+                $query->whereDate('tanggal', '>=', $startDate);
+            }
+            if (!empty($endDate)) {
+                $query->whereDate('tanggal', '<=', $endDate);
+            }
+            if (!empty($startDate) && !empty($endDate)) {
+                $monthName = Carbon::parse($startDate)->format('d/m/Y') . ' s/d ' . Carbon::parse($endDate)->format('d/m/Y');
+            } elseif (!empty($startDate)) {
+                $monthName = 'Mulai ' . Carbon::parse($startDate)->format('d/m/Y');
+            } else {
+                $monthName = 'Sampai ' . Carbon::parse($endDate)->format('d/m/Y');
+            }
+        } elseif (!empty($selectedMonth)) {
             $yearMonth = explode('-', $selectedMonth);
             if (count($yearMonth) === 2) {
                 $year = $yearMonth[0];
@@ -204,7 +248,8 @@ class ExpenseController extends Controller
             'address' => 'Pantai Gedambaan, Kotabaru, Kalimantan Selatan',
         ]);
 
-        $fileName = 'Laporan_Pengeluaran_' . str_replace(' ', '_', $monthName) . ($year ? '_' . $year : '') . '.xls';
+        $safeMonth = preg_replace('/[^A-Za-z0-9_-]/', '_', $monthName);
+        $fileName = 'Laporan_Pengeluaran_' . $safeMonth . ($year ? '_' . $year : '') . '.xls';
 
         return response()->view('admin.expenses.report_excel', compact(
             'setting', 'expenses', 'totalHarga', 'totalCount', 'monthName', 'year', 'selectedMonth'

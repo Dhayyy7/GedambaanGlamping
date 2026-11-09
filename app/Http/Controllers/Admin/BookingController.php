@@ -38,11 +38,21 @@ class BookingController extends Controller
 
         $search = $request->input('search', $request->input('code'));
         $status = $request->input('status');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         $query = Booking::with('room')->latest();
 
         if ($status !== null && $status !== '') {
             $query->where('status', $status);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('check_in_date', '>=', $startDate);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('check_in_date', '<=', $endDate);
         }
 
         if ($search) {
@@ -76,7 +86,7 @@ class BookingController extends Controller
         $rooms = Room::all();
         $extraFacilities = ExtraFacility::all();
 
-        return view('admin.bookings.index', compact('bookings', 'rooms', 'extraFacilities', 'search', 'status'));
+        return view('admin.bookings.index', compact('bookings', 'rooms', 'extraFacilities', 'search', 'status', 'startDate', 'endDate'));
     }
 
     /**
